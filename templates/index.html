@@ -140,10 +140,15 @@
         </form>
       </div>
     </div>
-
     <div class="card">
       <h2>Resultados da Análise</h2>
       <div class="results-area" id="resultsArea">
+        {% if resultado %}
+        <div style="display: flex; vertical-align: middle; align-items: center; gap: 1rem">
+          <div class="results-content" style="flex: 1">
+            {{ resultado|safe }}
+          </div>
+        </div>
         {% if arquivo_processado %}
         <div class="download-button" style="flex-shrink: 0">
           <a
@@ -154,12 +159,8 @@
             Baixar Arquivo
           </a>
         </div>
-        {% endif %} {% if resultado %}
-        <div style="display: flex; align-items: flex-start; gap: 1rem">
-          <div class="results-content" style="flex: 1">
-            {{ resultado|safe }}
-          </div>
-        </div>
+        {% endif %} 
+    </div>
         {% else %}
         <div style="font-size: 1.2rem; margin-bottom: 0.5rem">
           Nenhum dado carregado

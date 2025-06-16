@@ -8,7 +8,6 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
-
 # --- Configuração Inicial ---
 app = Flask(__name__)
 # Define as pastas para upload e arquivos processados
@@ -97,6 +96,12 @@ def processar_arquivo_excel(caminho_arquivo, nome_arquivo_saida):
     
     '''
     
+    for valor in df['UT'].unique():
+        tabela = df[df['UT'] == valor]
+        print(f"Tabela para UT = {valor}:")
+        print(tabela.head())  # Mostra as primeiras linhas da tabela filtrada
+        print("-" * 30)
+      
     
     
     # Salva o DataFrame modificado em um novo arquivo Excel
@@ -108,6 +113,8 @@ def processar_arquivo_excel(caminho_arquivo, nome_arquivo_saida):
     
     return nome_arquivo_saida
 
+def filtrar_ut():
+    pass
 # --- Rotas da Aplicação Flask ---
 
 @app.route('/')
@@ -146,6 +153,8 @@ def upload_file():
         df = pd.read_excel(os.path.join(app.config['PROCESSED_FOLDER'], nome_arquivo_processado))
         # # Exemplo: mostra as 5 primeiras linhas como HTML
         resultado_html = df.head().to_html(classes="results-table", index=False)
+        
+        
         
         # Mostra todas linhas como HTML
         #resultado_html = df.to_html(classes="results-table", index=False)
