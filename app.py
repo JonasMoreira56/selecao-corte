@@ -59,7 +59,8 @@ def processar_arquivo_excel(caminho_arquivo, nome_arquivo_saida):
     
     classe_diametrica = limite_inferior.astype(str) + '-' + limite_superior.astype(str)
     # Se o valor do DAP for maior que 100, mostra ">100"
-    df['CLASSE DIAMETRICA'] = np.where(df[coluna_g] > 100, '>100', classe_diametrica)
+    #df['CLASSE DIAMETRICA'] = np.where(df[coluna_g] > 100, '>100', classe_diametrica)
+    df['CLASSE DIAMETRICA'] = classe_diametrica
     
     # --- 3. Cálculo do Volume do Iventário ---
     # Fórmula: VOLUME INVENTARIO = 0,001602 * (DAP^1,9)
@@ -73,7 +74,7 @@ def processar_arquivo_excel(caminho_arquivo, nome_arquivo_saida):
     df['VOLUME CORRIGIDO'] = (df['VOLUME INVENTARIO'] * df['FATOR']).map(lambda x: f"{x:.2f}")
     
     #  --- 6. Tratamento da coluna Data ---
-    df['Data'] = pd.to_datetime(df['Data']).dt.strftime('%d/%m/%Y')
+    df['DATA INVENTARIO'] = pd.to_datetime(df['DATA INVENTARIO']).dt.strftime('%d/%m/%Y')
     
         
     
@@ -84,7 +85,17 @@ def processar_arquivo_excel(caminho_arquivo, nome_arquivo_saida):
     # --- 4. Cálculo da Área de Preservação Permanente (APP) ---
     # df['APP'] = np.where(df['DAP'] >= 50, 'SIM', 'NÃO')
     df['Categoria'] = np.where(df['APP'].str.upper() == 'NÃO', 'Dentro do Plano', 'Fora do Plano')
-    df['Situação Final'] = 'Pendente de Análise'
+    df['Situação Final'] = 'Pendente de Análise' 
+    '''
+    PORTA SEMENTE
+    REMANESCENTE DE FUTURO - Possui o diametro pequeno e não podem ser selecionada pra corte
+    PROTEGIDA - Dentro da APP
+    PROTEGIDA POR LEI - ANDIROBA / COPAIBA / SERINGA / CASTANHEIRA / PAU ROSA
+    QUALIDADE 3 - NÃO SERVE PARA SERRARIA
+    FORA DO PLANO DE CORTE
+    SELECIONADA PARA CORTE  
+    
+    '''
     
     
     
