@@ -45,7 +45,7 @@ def processar_arquivo_excel(caminho_arquivo, nome_arquivo_saida):
     df['DAP'] = df['DAP'].round(0)
     
     # Manter o valor de ajuste da coluna FATOR na nova tabela
-    df['FATOR'] = df[coluna_fator].apply(lambda x: f"{float(x):.2f}".replace('.', ','))  # Se necessário, ajuste o nome da coluna 'UT'
+    df['FATOR'] = df[coluna_fator].apply(lambda x: f"{float(x):.2f}")  # Se necessário, ajuste o nome da coluna 'UT'
     
     # Remover coluna fid
     df = df.drop(columns=['fid'])
@@ -59,7 +59,7 @@ def processar_arquivo_excel(caminho_arquivo, nome_arquivo_saida):
     
     classe_diametrica = limite_inferior.astype(str) + '-' + limite_superior.astype(str)
     # Se o valor do DAP for maior que 100, mostra ">100"
-    # df['CLASSE DIAMETRICA'] = np.where(df[coluna_g] > 100, '>100', classe_diametrica)
+    df['CLASSE DIAMETRICA'] = np.where(df[coluna_g] > 100, '>100', classe_diametrica)
     
     # --- 3. Cálculo do Volume do Iventário ---
     # Fórmula: VOLUME INVENTARIO = 0,001602 * (DAP^1,9)
@@ -174,4 +174,4 @@ def novo_projeto():
 
 if __name__ == '__main__':
     # Inicia o servidor Flask
-    app.run(debug=False)
+    app.run(debug=True)
