@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-g" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Processador de Inventário Florestal</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="static/style.css" />
+    <link rel="shortcut icon" type="imagex/png" href="static/img/logo.png" />
+  </head>
+  <body>
+    <!-- Modal de erro -->
+    {% if erro %}
+    <div
+      id="modalErro"
+      class="modal"
+      style="
+        display: block;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.5);
+      "
+    >
+      <div
+        style="
+          background: #fff;
+          margin: 10% auto;
+          padding: 35px;
+          border-radius: 8px;
+          width: 300px;
+          text-align: center;
+          position: relative;
+        "
+      >
+        <span
+          onclick="document.getElementById('modalErro').style.display='none'"
+          style="
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            cursor: pointer;
+            font-size: px;
+          "
+          >&times;</span
+        >
+        <p>{{ erro }}</p>
+      </div>
+    </div>
+    {% endif %}
+
+    <header class="header">
+  
+      <div class="header-content">
+        <div style="display: flex; align-items: center; gap: 1rem">
+          <img
+            src="static/img/logo_branca.png"
+            alt="Logo"
+            style="height: 45px"
+          />
+          <div>
+            <h1>Seleção de Corte</h1>
+            <div class="header-subtitle">
+              Sistema para Seleção de Árvores para Manejo Florestal
+            </div>
+          </div>
+        </div>
+        <div class="header-buttons">
+          <!-- Adicione dentro de <div class="header-buttons"> -->
+
+          <button
+            class="btn btn-primary"
+            onclick="window.location.href='/novo-projeto'"
+          >
+            Novo Projeto
+          </button>
+          <a href="/configuracoes" class="btn btn-secondary">Configurações</a>
+          <!-- <button class="btn btn-secondary" onclick="showAbout()">Sair</button> -->
+        </div>
+      </div>
+    </header>
+
+    <div class="main-container">
+      <div class="card">
+        <h2>Entrada de Dados</h2>
+
+        <div class="criteria-info">
+          <h3>Critérios de Seleção:</h3>
+          <ul>
+            <li>Árvores APP: não selecionadas (próximas ao igarapé)</li>
+            <li>
+              Para realizar a seleção de Corte, selecione somente os arquivos
+              que seguem o padrão
+            </li>
+            <li>DAP &lt; 50cm: corte futuro</li>
+            <li>DAP ≥ 50cm: seleção para corte</li>
+            <li>Mínimo 3 árvores por espécie ou 10% da classe</li>
+            <li>Definir árvores matrizes/porta-semente</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="container">
+        <h2 class="text-center mb-4">Upload de Arquivo Excel Inventário</h2>
+        <p class="text-center text-muted">
+          Faça o upload do seu arquivo de inventário. Formatos suportados:
+          .xlsx, .xls
+        </p>
+        <hr />
+        <form
+          action="/upload"
+          method="post"
+          enctype="multipart/form-data"
+          id="uploadForm"
+        >
+          <div class="mb-3">
+            <label for="file" class="form-label"
+              >Selecione o arquivo Excel:</label
+            >
+            <input
+              class="form-control"
+              type="file"
+              id="file"
+              name="file"
+              accept=".xlsx"
+              required
+            />
+          </div>
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary btn-lg">
+              Processar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Resultados da Análise</h2>
+      <div class="results-area" id="resultsArea">
+        {% if arquivo_processado %}
+        <div class="download-button" style="flex-shrink: 0">
+          <a
+            href="{{ url_for('download_file', filename=arquivo_processado) }}"
+            class="btn btn-success"
+            download
+          >
+            Baixar Arquivo
+          </a>
+        </div>
+        {% endif %} {% if resultado %}
+        <div style="display: flex; align-items: flex-start; gap: 1rem">
+          <div class="results-content" style="flex: 1">
+            {{ resultado|safe }}
+          </div>
+        </div>
+        {% else %}
+        <div style="font-size: 1.2rem; margin-bottom: 0.5rem">
+          Nenhum dado carregado
+        </div>
+        <div>
+          Faça o upload de um arquivo Excel e aguarde o resultado da análise.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </body>
+
+  <script>
+    document
+      .getElementById("uploadForm")
+      .addEventListener("submit", function () {
+        // Mostra o spinner na área de resultados
+        document.getElementById("resultsArea").innerHTML = `
+        <div class="d-flex flex-column align-items-center justify-content-center" style="min-height:120px;">
+            <div class="spinner-border text-success" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Processando...</span>
+            </div>
+            <div class="mt-3">Processando arquivo, aguarde...</div>
+        </div>
+    `;
+      });
+  </script>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <p>&copy;2025 Mil Madeiras Preciosas. Todos os direitos reservados.</p>
+      <img
+        src="static/img/fundo.png"
+        alt="Logo"
+        style="height: 32px; vertical-align: middle"
+      />
+    </div>
+  </footer>
+</html>
