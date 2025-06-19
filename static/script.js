@@ -9,3 +9,31 @@ document.getElementById('uploadForm').addEventListener('submit', function() {
         </div>
     `;
 });
+
+// ...existing code...
+document.getElementById('abrirModal').onclick = function() {
+  // Aqui você pode buscar os dados via AJAX/fetch ou já ter os dados em uma variável
+  const info = `Tabela para UT = 1:
+col1  col2  col3
+1     2     3
+4     5     6
+------------------------------
+Tabela para UT = 2:
+col1  col2  col3
+7     8     9
+10    11    12  
+------------------------------`;
+  document.getElementById('infoTabela').textContent = info;
+  document.getElementById('meuModal').style.display = "block";
+};
+
+document.querySelector('.fechar').onclick = function() {
+  document.getElementById('meuModal').style.display = "none";
+};
+
+window.onclick = function(event) {
+  if (event.target == document.getElementById('meuModal')) {
+    document.getElementById('meuModal').style.display = "none";
+  }
+};
+// ...existing code...

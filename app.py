@@ -35,7 +35,7 @@ def processar_arquivo_excel(caminho_arquivo, nome_arquivo_saida):
     coluna_cap = 'CAP'  # Nome da coluna com a Circunferência a Altura do Peito
     coluna_g = 'DAP'      # Nome da coluna 'G' mencionada na fórmula da classe de diâmetro
     coluna_fator = 'FATOR'      # Nome da coluna 'UT' mencionada na fórmula da classe de diâmetro
-            
+    coluna_especie = 'ESPECIE'        
     
     # --- 1. Cálculo do DAP a partir do CAP ---
     # Fórmula: DAP = CAP / π
@@ -48,6 +48,8 @@ def processar_arquivo_excel(caminho_arquivo, nome_arquivo_saida):
     
     # Remover coluna fid
     df = df.drop(columns=['fid'])
+
+
     
     # --- 2. Cálculo da Classe Diamétrica ---
     # A fórmula do Excel: =INT(G55/10)*10 & "-" & (INT(G55/10)*10 + 10)
@@ -81,11 +83,33 @@ def processar_arquivo_excel(caminho_arquivo, nome_arquivo_saida):
     #print(f"CLASSE DIAMETRICA  {df['CLASSE DIAMETRICA']}")  # Debug: Verifica as classes diamétricas calculadas
 
     # --- 4. Criação dos campos "Categoria" e "Situação Final" ---
-    # --- 4. Cálculo da Área de Preservação Permanente (APP) ---
+    
+    # --- 4. Classifica Arvores de Preservação Permanente (APP) ---
     # df['APP'] = np.where(df['DAP'] >= 50, 'SIM', 'NÃO')
-    df['Categoria'] = np.where(df['APP'].str.upper() == 'NÃO', 'Dentro do Plano', 'Fora do Plano')
+    df['Categoria'] = np.where(df['APP'].str.upper() == 'NÃO', 'Dentro do Plano', 'Em APP')
     df['Situação Final'] = 'Pendente de Análise' 
+    
+    
+     
+    
+        # ...existing code...
+                 
+        
+   
+    # Salva o DataFrame modificado em um novo arquivo Excel
+    caminho_saida = os.path.join(app.config['PROCESSED_FOLDER'], nome_arquivo_saida)
+    # O `index=False` é crucial para não adicionar uma coluna de índice ao Excel
+    df.to_excel(caminho_saida, index=False)
+    
+    return nome_arquivo_saida
+
+def classificar_ut(nome_arquivo_processado):
+    pass
     '''
+    # Carrega a planilha do arquivo de sa
+    df = pd.read_excel(nome_arquivo_saida)
+    
+
     PORTA SEMENTE
     REMANESCENTE DE FUTURO - Possui o diametro pequeno e não podem ser selecionada pra corte
     PROTEGIDA - Dentro da APP
@@ -94,29 +118,104 @@ def processar_arquivo_excel(caminho_arquivo, nome_arquivo_saida):
     FORA DO PLANO DE CORTE
     SELECIONADA PARA CORTE  
     
-    '''
+
+    
+      
+    # CLASSIFICAÇÃO ESPECIE
+    #Maior que 50       
+        # mAIOR QUE 70
+        #ipam - IPRO
+    
+    # MAIOR QUE 80
+    # CUMA - CUVE 
+    
+    # menor que 50 para corte (PORTE)
+    # (30 - 50 DE DAP) SELECIONADA PARA CORTE
+    # QUALIDADE 3 - REMANESCENTE QUALIDADE INFERIOR
+    # PRA ESSA ESPECIE < 30 -> REMANESCENTE FUTURO
+    # >50 REMANESCENTE FORA DO PLANO DE CORTE
+
+    ACAR - ABIU - MATA
+
+    # Seleciona arvores que não estão na APP
+    
+     
     
     for valor in df['UT'].unique():
         tabela = df[df['UT'] == valor]
-        print(f"Tabela para UT = {valor}:")
-        print(tabela.head())  # Mostra as primeiras linhas da tabela filtrada
-        print("-" * 30)
+        
+        # Filtra apenas as linhas com DAP >= 50
+        selecionadas_corte = tabela[tabela['DAP'] >= 50]
+        if not selecionadas_corte.empty:
+            print("MAIOR QUE 50")
+            print(selecionadas_corte.head())  # Mostra as primeiras linhas selecionadas para corte
+        
+        else:
+            print("MENOR QUE 50")   
+            if tabela[(tabela['ESPECIE'])] == "ACAR" or "ABIU" or "MATA":
+                if tabela[df['QUALIDADE']] == 3:
+                    print('REMANESCENTE QUALIDADE INFERIOR')
+                if 30 <= tabela[df['DAP']] <= 50:
+                    print('SELECIONADA PARA CORTE')
+                elif tabela[df['DAP']]  < 30:
+                    print ('REMANESCENTE FUTURO')
+                elif tabela[df['DAP']] > 50:
+                    print('REMANESCENTE FORA DO PLANO DE CORTE')
+            return 'NÃO SE APLICA'
+        
       
+        # Seleciona árvores com DAP > 70 e espécie IPAM ou IPRO
+        ipam_ipro = tabela[
+            (tabela['DAP'] > 70) & 
+            (tabela['ESPECIE'].isin(['IPAM', 'IPRO']))
+        ]
+        if not ipam_ipro.empty:
+            print("MAIOR QUE 70 - IPAM ou IPRO")
+            print(ipam_ipro.head())
+            
+        # Seleciona árvores com DAP > 80 e espécie CUMA ou CUVE
+        cuma_cuve = tabela[
+            (tabela['DAP'] > 80) & 
+            (tabela['ESPECIE'].isin(['CUMA', 'CUVE']))
+        ]
+        if not cuma_cuve.empty:
+            print("MAIOR QUE 80 - CUMA ou CUVE")
+            print(cuma_cuve.head())
+        
+    
+        print(f"Tabela para UT = {valor}:")
+        #print(tabela.head())  # Mostra as primeiras linhas da tabela filtrada
+        print("-" * 30)
+   
     
     
-    # Salva o DataFrame modificado em um novo arquivo Excel
-    caminho_saida = os.path.join(app.config['PROCESSED_FOLDER'], nome_arquivo_saida)
-    # O `index=False` é crucial para não adicionar uma coluna de índice ao Excel
-    df.to_excel(caminho_saida, index=False)
     
-    
-    
-    return nome_arquivo_saida
+    for valor in df['UT'].unique():
+        tabela = df[df['UT'] == valor]
+        
+        # Filtra apenas as linhas com DAP >= 50
+        selecionadas_corte = tabela[tabela['DAP'] >= 50]
+        if not selecionadas_corte.empty:
+            print("MAIOR QUE 50")
+            print(selecionadas_corte.head())
+        else:
+            print("MENOR QUE 50")
+            # Corrigindo a condição para múltiplas espécies
+            especies_alvo = ["ACAR", "ABIU", "MATA"]
+            filtro_especie = tabela['ESPECIE'].isin(especies_alvo)
+            filtro_qualidade = tabela['QUALIDADE'] == 3
+            filtro_dap_30_50 = (tabela['DAP'] >= 30) & (tabela['DAP'] <= 50)
+            filtro_dap_menor_30 = tabela['DAP'] < 30
+            filtro_dap_maior_50 = tabela['DAP'] > 50
 
-def filtrar_ut():
-    pass
+            if filtro_especie.any():
+                if filtro_qualidade.any():
+                    print('REMANESCENTE QUALIDADE INFERIOR')
+                if filtro_dap_30_50.any():
+                    print('SELECIONADA PARA CORTE')
+                elif filtro_dap_menor_30.any(): '''
+                       
 # --- Rotas da Aplicação Flask ---
-
 @app.route('/')
 def index():
     """Renderiza a página inicial com o formulário de upload."""
@@ -148,14 +247,15 @@ def upload_file():
         print(f"Arquivo processado será salvo como: {nome_arquivo_processado}")
         
         processar_arquivo_excel(caminho_original, nome_arquivo_processado)
+        
+        classificar_ut(nome_arquivo_processado)
 
         # Carrega parte dos dados para exibir no template
         df = pd.read_excel(os.path.join(app.config['PROCESSED_FOLDER'], nome_arquivo_processado))
         # # Exemplo: mostra as 5 primeiras linhas como HTML
         resultado_html = df.head().to_html(classes="results-table", index=False)
         
-        
-        
+    
         # Mostra todas linhas como HTML
         #resultado_html = df.to_html(classes="results-table", index=False)
         
