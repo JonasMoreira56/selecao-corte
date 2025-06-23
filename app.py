@@ -4,7 +4,6 @@ from flask import Flask, request, render_template, send_from_directory, redirect
 from werkzeug.utils import secure_filename
 import numpy as np # Usado para o valor de PI
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -86,14 +85,13 @@ def processar_arquivo_excel(caminho_arquivo, nome_arquivo_saida):
     
     # --- 4. Classifica Arvores de Preservação Permanente (APP) ---
     # df['APP'] = np.where(df['DAP'] >= 50, 'SIM', 'NÃO')
-    df['Categoria'] = np.where(df['APP'].str.upper() == 'NÃO', 'Dentro do Plano', 'Em APP')
-    df['Situação Final'] = 'Pendente de Análise' 
+    df['CLASSIFICAÇÃO'] = np.where(df['APP'].str.upper() == 'NÃO', 'Dentro do Plano', 'Fora do Plano')
+    df['Situação Final'] = 'Aguardando Análise' 
     
-    
-     
-    
-        # ...existing code...
-                 
+    # --- 5. Correção no nome dos campos de observação
+    # DE = Diametro Estimado / NULO = OK / CT = Comercial Terra
+    if 'OBSERVAÇÃO' in df.columns:
+        df['OBSERVAÇÃO'] = df['OBSERVAÇÃO'].replace('NULO','OK')
         
    
     # Salva o DataFrame modificado em um novo arquivo Excel
@@ -104,22 +102,19 @@ def processar_arquivo_excel(caminho_arquivo, nome_arquivo_saida):
     return nome_arquivo_saida
 
 def classificar_ut(nome_arquivo_processado):
-    pass
-    '''
+    caminho_arquivo = os.path.join(app.config['PROCESSED_FOLDER'], nome_arquivo_processado)
+
     # Carrega a planilha do arquivo de sa
-    df = pd.read_excel(nome_arquivo_saida)
+    df = pd.read_excel(caminho_arquivo)
     
 
-    PORTA SEMENTE
-    REMANESCENTE DE FUTURO - Possui o diametro pequeno e não podem ser selecionada pra corte
-    PROTEGIDA - Dentro da APP
-    PROTEGIDA POR LEI - ANDIROBA / COPAIBA / SERINGA / CASTANHEIRA / PAU ROSA
-    QUALIDADE 3 - NÃO SERVE PARA SERRARIA
-    FORA DO PLANO DE CORTE
-    SELECIONADA PARA CORTE  
-    
-
-    
+    # PORTA SEMENTE
+    # REMANESCENTE DE FUTURO - Possui o diametro pequeno e não podem ser selecionada pra corte
+    # PROTEGIDA - Dentro da APP
+    # PROTEGIDA POR LEI - ANDIROBA / COPAIBA / SERINGA / CASTANHEIRA / PAU ROSA
+    # QUALIDADE 3 - NÃO SERVE PARA SERRARIA
+    # FORA DO PLANO DE CORTE
+    # SELECIONADA PARA CORTE  
       
     # CLASSIFICAÇÃO ESPECIE
     #Maior que 50       
@@ -135,61 +130,61 @@ def classificar_ut(nome_arquivo_processado):
     # PRA ESSA ESPECIE < 30 -> REMANESCENTE FUTURO
     # >50 REMANESCENTE FORA DO PLANO DE CORTE
 
-    ACAR - ABIU - MATA
+    # ACAR - ABIU - MATA
 
     # Seleciona arvores que não estão na APP
     
-     
+
     
-    for valor in df['UT'].unique():
-        tabela = df[df['UT'] == valor]
+    # for valor in df['UT'].unique():
+    #     tabela = df[df['UT'] == valor]
         
-        # Filtra apenas as linhas com DAP >= 50
-        selecionadas_corte = tabela[tabela['DAP'] >= 50]
-        if not selecionadas_corte.empty:
-            print("MAIOR QUE 50")
-            print(selecionadas_corte.head())  # Mostra as primeiras linhas selecionadas para corte
+    #     # Filtra apenas as linhas com DAP >= 50
+    #     selecionadas_corte = tabela[tabela['DAP'] >= 50]
+    #     if not selecionadas_corte.empty:
+    #         print("MAIOR QUE 50")
+    #         print(selecionadas_corte.head())  # Mostra as primeiras linhas selecionadas para corte
         
-        else:
-            print("MENOR QUE 50")   
-            if tabela[(tabela['ESPECIE'])] == "ACAR" or "ABIU" or "MATA":
-                if tabela[df['QUALIDADE']] == 3:
-                    print('REMANESCENTE QUALIDADE INFERIOR')
-                if 30 <= tabela[df['DAP']] <= 50:
-                    print('SELECIONADA PARA CORTE')
-                elif tabela[df['DAP']]  < 30:
-                    print ('REMANESCENTE FUTURO')
-                elif tabela[df['DAP']] > 50:
-                    print('REMANESCENTE FORA DO PLANO DE CORTE')
-            return 'NÃO SE APLICA'
+    #     else:
+    #         print("MENOR QUE 50")   
+    #         if tabela[(tabela['ESPECIE'])] == "ACAR" or "ABIU" or "MATA":
+    #             if tabela[df['QUALIDADE']] == 3:
+    #                 print('REMANESCENTE QUALIDADE INFERIOR')
+    #             if 30 <= tabela[df['DAP']] <= 50:
+    #                 print('SELECIONADA PARA CORTE')
+    #             elif tabela[df['DAP']]  < 30:
+    #                 print ('REMANESCENTE FUTURO')
+    #             elif tabela[df['DAP']] > 50:
+    #                 print('REMANESCENTE FORA DO PLANO DE CORTE')
+    #         return 'NÃO SE APLICA'
         
       
-        # Seleciona árvores com DAP > 70 e espécie IPAM ou IPRO
-        ipam_ipro = tabela[
-            (tabela['DAP'] > 70) & 
-            (tabela['ESPECIE'].isin(['IPAM', 'IPRO']))
-        ]
-        if not ipam_ipro.empty:
-            print("MAIOR QUE 70 - IPAM ou IPRO")
-            print(ipam_ipro.head())
+    #     # Seleciona árvores com DAP > 70 e espécie IPAM ou IPRO
+    #     ipam_ipro = tabela[
+    #         (tabela['DAP'] > 70) & 
+    #         (tabela['ESPECIE'].isin(['IPAM', 'IPRO']))
+    #     ]
+    #     if not ipam_ipro.empty:
+    #         print("MAIOR QUE 70 - IPAM ou IPRO")
+    #         print(ipam_ipro.head())
             
-        # Seleciona árvores com DAP > 80 e espécie CUMA ou CUVE
-        cuma_cuve = tabela[
-            (tabela['DAP'] > 80) & 
-            (tabela['ESPECIE'].isin(['CUMA', 'CUVE']))
-        ]
-        if not cuma_cuve.empty:
-            print("MAIOR QUE 80 - CUMA ou CUVE")
-            print(cuma_cuve.head())
+    #     # Seleciona árvores com DAP > 80 e espécie CUMA ou CUVE
+    #     cuma_cuve = tabela[
+    #         (tabela['DAP'] > 80) & 
+    #         (tabela['ESPECIE'].isin(['CUMA', 'CUVE']))
+    #     ]
+    #     if not cuma_cuve.empty:
+    #         print("MAIOR QUE 80 - CUMA ou CUVE")
+    #         print(cuma_cuve.head())
         
     
-        print(f"Tabela para UT = {valor}:")
-        #print(tabela.head())  # Mostra as primeiras linhas da tabela filtrada
-        print("-" * 30)
+    #     print(f"Tabela para UT = {valor}:")
+    #     #print(tabela.head())  # Mostra as primeiras linhas da tabela filtrada
+    #     print("-" * 30)
    
     
     
-    
+    '''
     for valor in df['UT'].unique():
         tabela = df[df['UT'] == valor]
         
@@ -214,6 +209,9 @@ def classificar_ut(nome_arquivo_processado):
                 if filtro_dap_30_50.any():
                     print('SELECIONADA PARA CORTE')
                 elif filtro_dap_menor_30.any(): '''
+    
+    # Salva de volta
+    df.to_excel(caminho_arquivo, index=False)
                        
 # --- Rotas da Aplicação Flask ---
 @app.route('/')
