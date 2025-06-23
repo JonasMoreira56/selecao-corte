@@ -134,8 +134,6 @@ def classificar_ut(nome_arquivo_processado):
 
     # Seleciona arvores que não estão na APP
     
-
-    
     # for valor in df['UT'].unique():
     #     tabela = df[df['UT'] == valor]
         
@@ -210,8 +208,11 @@ def classificar_ut(nome_arquivo_processado):
                     print('SELECIONADA PARA CORTE')
                 elif filtro_dap_menor_30.any(): '''
     
+    # Exemplo: adiciona uma coluna de teste
+    df['TESTE'] = 'ATENDIDO'
+    
     # Salva de volta
-    df.to_excel(caminho_arquivo, index=False)
+    # df.to_excel(caminho_arquivo, index=False)
                        
 # --- Rotas da Aplicação Flask ---
 @app.route('/')
@@ -245,8 +246,6 @@ def upload_file():
         print(f"Arquivo processado será salvo como: {nome_arquivo_processado}")
         
         processar_arquivo_excel(caminho_original, nome_arquivo_processado)
-        
-        classificar_ut(nome_arquivo_processado)
 
         # Carrega parte dos dados para exibir no template
         df = pd.read_excel(os.path.join(app.config['PROCESSED_FOLDER'], nome_arquivo_processado))
@@ -261,6 +260,14 @@ def upload_file():
         return render_template('index.html', resultado=resultado_html, arquivo_processado=nome_arquivo_processado)
     
     return render_template('index.html', resultado=None, erro="Formato de arquivo inválido. Por favor, envie um arquivo .xlsx")
+
+@app.route('/classificar/<arquivo>', methods=['POST'])
+def classificar_arquivo(arquivo):
+    classificar_ut(arquivo)
+    # Recarrega o DataFrame atualizado
+    df = pd.read_excel(os.path.join(app.config['PROCESSED_FOLDER'], arquivo))
+    resultado_html = df.head().to_html(classes="results-table", index=False)
+    return render_template('index.html', resultado=resultado_html, arquivo_processado=arquivo)
 
 @app.route('/download/<filename>')
 def download_file(filename):

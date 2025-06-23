@@ -266,6 +266,16 @@ body {
     border-radius: 12px;
 }
 
+.download-button {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.download-button form,
+.download-button a {
+  margin: 0;
+}
+
 .loading-spinner {
     width: 40px;
     height: 40px;

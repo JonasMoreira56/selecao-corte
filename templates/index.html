@@ -151,8 +151,14 @@
             {{ resultado|safe }}
           </div>
         </div>
+ 
+       
         {% if arquivo_processado %}
-        <div class="download-button" style="flex-shrink: 0">
+        <div id="progresso" style="display:none;">
+                <p>Processando classificação por UT... aguarde!</p>
+                <progress></progress>
+            </div>
+        <div class="download-button">
           <a
             href="{{ url_for('download_file', filename=arquivo_processado) }}"
             class="btn btn-success"
@@ -160,7 +166,13 @@
           >
             Baixar Arquivo
           </a>
+
+        <form id="form-classificar" action="{{ url_for('classificar_arquivo', arquivo=arquivo_processado) }}" method="post">
+          <button class="btn btn-success"  type="submit" id="btn-classificar">Classificar por UT</button>
+        </form>
+                 
         </div>
+      
         {% endif %} 
     </div>
         {% else %}
@@ -191,6 +203,17 @@
         </div>
     `;
       });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('form-classificar');
+      if(form){
+          form.addEventListener('submit', function() {
+              document.getElementById('progresso').style.display = 'block';
+          });
+
+          
+      }
+  });
   </script>
 
   <footer class="footer">
