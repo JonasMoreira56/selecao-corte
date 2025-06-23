@@ -76,7 +76,7 @@
 
           <button
             class="btn btn-primary"
-            onclick="window.location.href='/novo-projeto'"
+            onclick="abrirModalConfirmacao()"
           >
             Novo Projeto
           </button>
@@ -85,6 +85,14 @@
         </div>
       </div>
     </header>
+    <!-- Modal de confirmação -->
+    <div class="modal" tabindex="-1" id="modalConfirmacao">
+      <div style="background:rgba(255, 255, 255, 0.5); margin:10% auto; padding:30px; border-radius:8px; width:320px; text-align:center; position:relative;">
+        <p>Tem certeza que deseja iniciar um novo projeto? Os dados atuais serão perdidos.</p>
+        <button class="btn btn-primary" id="confirmarNovoProjeto">Sim, continuar</button>
+        <button class="btn btn-secondary" onclick="fecharModalConfirmacao()">Cancelar</button>
+      </div>
+    </div>
 
     <div class="main-container">
       <div class="card">
@@ -142,7 +150,7 @@
     </div>
   
     <div class="card">
-      <h2>Resultados da Análise</h2>
+      <h2>Resultados da Análise (1° Seleção)</h2>
       
       <div class="results-area" id="resultsArea">
         {% if resultado %}
@@ -159,16 +167,9 @@
                 <progress></progress>
             </div>
         <div class="download-button">
-          <a
-            href="{{ url_for('download_file', filename=arquivo_processado) }}"
-            class="btn btn-success"
-            download
-          >
-            Baixar Arquivo
-          </a>
 
         <form id="form-classificar" action="{{ url_for('classificar_arquivo', arquivo=arquivo_processado) }}" method="post">
-          <button class="btn btn-success"  type="submit" id="btn-classificar">Classificar por UT</button>
+          <button class="btn btn-success"  type="submit" id="btn-classificar">Aplicar Classificação por UT</button>
         </form>
                  
         </div>
@@ -191,29 +192,45 @@
 
   <script>
     document
-      .getElementById("uploadForm")
-      .addEventListener("submit", function () {
-        // Mostra o spinner na área de resultados
-        document.getElementById("resultsArea").innerHTML = `
-        <div class="d-flex flex-column align-items-center justify-content-center" style="min-height:120px;">
-            <div class="spinner-border text-success" role="status" style="width: 3rem; height: 3rem;">
-                <span class="visually-hidden">Processando...</span>
-            </div>
-            <div class="mt-3">Processando arquivo, aguarde...</div>
-        </div>
-    `;
+    .getElementById("uploadForm")
+    .addEventListener("submit", function () {
+      // Mostra o spinner na área de resultados
+      document.getElementById("resultsArea").innerHTML = `
+          <div class="d-flex flex-column align-items-center justify-content-center" style="min-height:120px;">
+              <div class="spinner-border text-success" role="status" style="width: 3rem; height: 3rem;">
+                  <span class="visually-hidden">Processando...</span>
+              </div>
+              <div class="mt-3">Processando arquivo, aguarde...</div>
+          </div>
+      `;
+    });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('form-classificar');
+    if (form) {
+      form.addEventListener('submit', function () {
+        document.getElementById('progresso').style.display = 'block';
       });
 
-    document.addEventListener('DOMContentLoaded', function() {
-      const form = document.getElementById('form-classificar');
-      if(form){
-          form.addEventListener('submit', function() {
-              document.getElementById('progresso').style.display = 'block';
-          });
 
-          
-      }
+    }
   });
+
+  function abrirModalConfirmacao() {
+  document.getElementById('modalConfirmacao').style.display = 'block';
+  }
+  function fecharModalConfirmacao() {
+    document.getElementById('modalConfirmacao').style.display = 'none';
+  }
+  document.addEventListener('DOMContentLoaded', function () {
+    const btn = document.getElementById('confirmarNovoProjeto');
+    if (btn) {
+      btn.onclick = function () {
+        window.location.href = '/novo-projeto';
+      };
+    }
+  });
+    
   </script>
 
   <footer class="footer">

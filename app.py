@@ -212,9 +212,9 @@ def classificar_ut(nome_arquivo_processado):
     df['TESTE'] = 'ATENDIDO'
     
     # Salva de volta
-    # df.to_excel(caminho_arquivo, index=False)
+    df.to_excel(caminho_arquivo, index=False)
                        
-# --- Rotas da Aplicação Flask ---
+# --- Rotas da Aplicação Flask --   -
 @app.route('/')
 def index():
     """Renderiza a página inicial com o formulário de upload."""
@@ -266,8 +266,8 @@ def classificar_arquivo(arquivo):
     classificar_ut(arquivo)
     # Recarrega o DataFrame atualizado
     df = pd.read_excel(os.path.join(app.config['PROCESSED_FOLDER'], arquivo))
-    resultado_html = df.head().to_html(classes="results-table", index=False)
-    return render_template('index.html', resultado=resultado_html, arquivo_processado=arquivo)
+    resultado_html = df.head(10).to_html(classes="results-table", index=False)
+    return render_template('resultado.html', resultado=resultado_html, arquivo_processado=arquivo)
 
 @app.route('/download/<filename>')
 def download_file(filename):
