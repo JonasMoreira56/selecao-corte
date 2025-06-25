@@ -33,8 +33,7 @@ def processar_arquivo_excel(caminho_arquivo, nome_arquivo_saida):
     # Exemplo: Se sua coluna de CAP se chama "Circunferência", use 'Circunferência'
     coluna_cap = 'CAP'  # Nome da coluna com a Circunferência a Altura do Peito
     coluna_g = 'DAP'      # Nome da coluna 'G' mencionada na fórmula da classe de diâmetro
-    coluna_fator = 'FATOR'      # Nome da coluna 'UT' mencionada na fórmula da classe de diâmetro
-    coluna_especie = 'ESPECIE'        
+    coluna_fator = 'FATOR'      # Nome da coluna 'UT' mencionada na fórmula da classe de diâmetro      
     
     # --- 1. Cálculo do DAP a partir do CAP ---
     # Fórmula: DAP = CAP / π
@@ -83,11 +82,22 @@ def processar_arquivo_excel(caminho_arquivo, nome_arquivo_saida):
 
     # --- 4. Criação dos campos "Categoria" e "Situação Final" ---
     
-    # --- 4. Classifica Arvores de Preservação Permanente (APP) ---
-    # df['APP'] = np.where(df['DAP'] >= 50, 'SIM', 'NÃO')
-    df['CLASSIFICAÇÃO'] = np.where(df['APP'].str.upper() == 'NÃO', 'Dentro do Plano', 'Fora do Plano')
-    df['Situação Final'] = 'Aguardando Análise' 
+    # --- 4. Classifica Arvores de Preservação Permanente (APP) e Protegidas ---
+    especies_protegidas = ["SERI", "ANDI", "COPA", "CAST", "PARO", "PAA", "SOVA"]
     
+    condicoes = [
+        df['APP'].str.upper() == 'SIM',
+        df['ESPECIE'].str.upper().isin(especies_protegidas)
+    ]
+    resultados = [
+        'Arvore na area de preservacao permanente',
+        'Arvore protegida'
+    ]
+
+    df['CLASSIFICAÇÃO'] = np.select(condicoes, resultados, default='Pendente de Analise')
+    
+    
+       
     # --- 5. Correção no nome dos campos de observação
     # DE = Diametro Estimado / NULO = OK / CT = Comercial Terra
     if 'OBSERVAÇÃO' in df.columns:
@@ -107,114 +117,82 @@ def classificar_ut(nome_arquivo_processado):
     # Carrega a planilha do arquivo de sa
     df = pd.read_excel(caminho_arquivo)
     
-
-    # PORTA SEMENTE
-    # REMANESCENTE DE FUTURO - Possui o diametro pequeno e não podem ser selecionada pra corte
-    # PROTEGIDA - Dentro da APP
-    # PROTEGIDA POR LEI - ANDIROBA / COPAIBA / SERINGA / CASTANHEIRA / PAU ROSA
-    # QUALIDADE 3 - NÃO SERVE PARA SERRARIA
-    # FORA DO PLANO DE CORTE
-    # SELECIONADA PARA CORTE  
       
     # CLASSIFICAÇÃO ESPECIE
     #Maior que 50       
         # mAIOR QUE 70
         #ipam - IPRO
-    
-    # MAIOR QUE 80
-    # CUMA - CUVE 
-    
-    # menor que 50 para corte (PORTE)
-    # (30 - 50 DE DAP) SELECIONADA PARA CORTE
-    # QUALIDADE 3 - REMANESCENTE QUALIDADE INFERIOR
-    # PRA ESSA ESPECIE < 30 -> REMANESCENTE FUTURO
-    # >50 REMANESCENTE FORA DO PLANO DE CORTE
-
-    # ACAR - ABIU - MATA
-
-    # Seleciona arvores que não estão na APP
-    
-    # for valor in df['UT'].unique():
-    #     tabela = df[df['UT'] == valor]
-        
-    #     # Filtra apenas as linhas com DAP >= 50
-    #     selecionadas_corte = tabela[tabela['DAP'] >= 50]
-    #     if not selecionadas_corte.empty:
-    #         print("MAIOR QUE 50")
-    #         print(selecionadas_corte.head())  # Mostra as primeiras linhas selecionadas para corte
-        
-    #     else:
-    #         print("MENOR QUE 50")   
-    #         if tabela[(tabela['ESPECIE'])] == "ACAR" or "ABIU" or "MATA":
-    #             if tabela[df['QUALIDADE']] == 3:
-    #                 print('REMANESCENTE QUALIDADE INFERIOR')
-    #             if 30 <= tabela[df['DAP']] <= 50:
-    #                 print('SELECIONADA PARA CORTE')
-    #             elif tabela[df['DAP']]  < 30:
-    #                 print ('REMANESCENTE FUTURO')
-    #             elif tabela[df['DAP']] > 50:
-    #                 print('REMANESCENTE FORA DO PLANO DE CORTE')
-    #         return 'NÃO SE APLICA'
-        
-      
-    #     # Seleciona árvores com DAP > 70 e espécie IPAM ou IPRO
-    #     ipam_ipro = tabela[
-    #         (tabela['DAP'] > 70) & 
-    #         (tabela['ESPECIE'].isin(['IPAM', 'IPRO']))
-    #     ]
-    #     if not ipam_ipro.empty:
-    #         print("MAIOR QUE 70 - IPAM ou IPRO")
-    #         print(ipam_ipro.head())
-            
-    #     # Seleciona árvores com DAP > 80 e espécie CUMA ou CUVE
-    #     cuma_cuve = tabela[
-    #         (tabela['DAP'] > 80) & 
-    #         (tabela['ESPECIE'].isin(['CUMA', 'CUVE']))
-    #     ]
-    #     if not cuma_cuve.empty:
-    #         print("MAIOR QUE 80 - CUMA ou CUVE")
-    #         print(cuma_cuve.head())
-        
-    
-    #     print(f"Tabela para UT = {valor}:")
-    #     #print(tabela.head())  # Mostra as primeiras linhas da tabela filtrada
-    #     print("-" * 30)
-   
-    
-    
-    '''
     for valor in df['UT'].unique():
         tabela = df[df['UT'] == valor]
         
-        # Filtra apenas as linhas com DAP >= 50
-        selecionadas_corte = tabela[tabela['DAP'] >= 50]
-        if not selecionadas_corte.empty:
-            print("MAIOR QUE 50")
-            print(selecionadas_corte.head())
-        else:
-            print("MENOR QUE 50")
-            # Corrigindo a condição para múltiplas espécies
-            especies_alvo = ["ACAR", "ABIU", "MATA"]
-            filtro_especie = tabela['ESPECIE'].isin(especies_alvo)
-            filtro_qualidade = tabela['QUALIDADE'] == 3
-            filtro_dap_30_50 = (tabela['DAP'] >= 30) & (tabela['DAP'] <= 50)
-            filtro_dap_menor_30 = tabela['DAP'] < 30
-            filtro_dap_maior_50 = tabela['DAP'] > 50
+        # Filtra apenas árvores que NÃO são APP nem protegidas
+        filtro_nao_app_protegida = ~(
+            (tabela['CLASSIFICAÇÃO'] == 'Arvore na area de preservacao permanente') |
+            (tabela['CLASSIFICAÇÃO'] == 'Arvore protegida')
+        )
+        tabela_filtrada = tabela[filtro_nao_app_protegida]
+        idx = tabela_filtrada.index
+        
+        """
+        Regras de classificação aplicadas por UT para as espécies do tipo porte ACAR, ABIU e MATA:
 
-            if filtro_especie.any():
-                if filtro_qualidade.any():
-                    print('REMANESCENTE QUALIDADE INFERIOR')
-                if filtro_dap_30_50.any():
-                    print('SELECIONADA PARA CORTE')
-                elif filtro_dap_menor_30.any(): '''
-    
-    # Exemplo: adiciona uma coluna de teste
-    df['TESTE'] = 'ATENDIDO'
-    
-    # Salva de volta
+        - Se QUALIDADE == 3: classifica como 'REMANESCENTE QUALIDADE INFERIOR'
+          (árvore de qualidade inferior, não serve para serraria)
+        - Se 30 <= DAP <= 50: classifica como 'SELECIONADA PARA CORTE'
+          (árvore com porte adequado para corte)
+        - Se DAP < 30: classifica como 'REMANESCENTE FUTURO'
+          (árvore jovem, remanescente para o futuro)
+        - Se DAP > 50: classifica como 'REMANESCENTE FORA DO PLANO DE CORTE'
+          (árvore fora do plano de corte por porte elevado)
+
+        Observação: Essas regras só são aplicadas para árvores que NÃO estão em APP
+        (Área de Preservação Permanente) e NÃO são protegidas.
+        """
+        especies_porte = ["ACAR", "ABIU", "MATA"]
+        especies_acima70 = ["IPAM","IPRO"]
+        especies_acima80 = ["CUMA","CUVE"]
+        
+        
+        
+  
+
+        condicoes = [
+            (tabela_filtrada['ESPECIE'].isin(especies_acima70)) & (tabela_filtrada['DAP'] >= 70) & (tabela_filtrada['QUALIDADE'] < 3),
+            (tabela_filtrada['ESPECIE'].isin(especies_acima80)) & (tabela_filtrada['DAP'] >= 80) & (tabela_filtrada['QUALIDADE'] < 3),
+            (tabela_filtrada['ESPECIE'].isin(especies_porte)) & (tabela_filtrada['QUALIDADE'] == 3),
+            (tabela_filtrada['ESPECIE'].isin(especies_porte)) & (tabela_filtrada['DAP'] >= 30) & (tabela_filtrada['DAP'] <= 50),
+            (tabela_filtrada['ESPECIE'].isin(especies_porte)) & (tabela_filtrada['DAP'] < 30),
+            tabela_filtrada['DAP'] >= 50,
+            tabela_filtrada['DAP'] < 50
+        ]
+        resultados = [
+            'Selecionada para Corte acima de 70',
+            'Selecionada para Corte acima de 80',
+            'Remanescente Qualidade Inferior',
+            'Selecionada Para Corte',
+            'Remanescente Futuro',
+            'Selecionada para corte Maior que 50',
+            'Remanescente Futuro Menor que 50 - Diversas'
+        ]
+        
+        '''
+        Destinação:
+            - ARVORE NA AREA DE PRESERVAÇÃO PERMANENTE
+            - ARVORE PROTEGIDA
+            - REMANESCENTE QUALIDADE INFERIOR
+            - SELECIONADA PARA CORTE
+            - REMANESCENTE FUTURO      
+        '''
+
+        # Aplica as classificações apenas nas linhas do grupo atual (UT)
+        classificacoes = np.select(condicoes, resultados, default=df.loc[idx, 'CLASSIFICAÇÃO'])
+        df.loc[idx, 'CLASSIFICAÇÃO'] = classificacoes
+            
+
+    # Salva o DataFrame atualizado
     df.to_excel(caminho_arquivo, index=False)
                        
-# --- Rotas da Aplicação Flask --   -
+# --- Rotas da Aplicação Flask --
 @app.route('/')
 def index():
     """Renderiza a página inicial com o formulário de upload."""
