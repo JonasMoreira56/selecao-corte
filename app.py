@@ -117,11 +117,6 @@ def classificar_ut(nome_arquivo_processado):
     # Carrega a planilha do arquivo de sa
     df = pd.read_excel(caminho_arquivo)
     
-      
-    # CLASSIFICAÇÃO ESPECIE
-    #Maior que 50       
-        # mAIOR QUE 70
-        #ipam - IPRO
     for valor in df['UT'].unique():
         tabela = df[df['UT'] == valor]
         
@@ -152,37 +147,37 @@ def classificar_ut(nome_arquivo_processado):
         especies_acima70 = ["IPAM","IPRO"]
         especies_acima80 = ["CUMA","CUVE"]
         
-        
-        
-  
-
         condicoes = [
             (tabela_filtrada['ESPECIE'].isin(especies_acima70)) & (tabela_filtrada['DAP'] >= 70) & (tabela_filtrada['QUALIDADE'] < 3),
             (tabela_filtrada['ESPECIE'].isin(especies_acima80)) & (tabela_filtrada['DAP'] >= 80) & (tabela_filtrada['QUALIDADE'] < 3),
             (tabela_filtrada['ESPECIE'].isin(especies_porte)) & (tabela_filtrada['QUALIDADE'] == 3),
             (tabela_filtrada['ESPECIE'].isin(especies_porte)) & (tabela_filtrada['DAP'] >= 30) & (tabela_filtrada['DAP'] <= 50),
             (tabela_filtrada['ESPECIE'].isin(especies_porte)) & (tabela_filtrada['DAP'] < 30),
-            tabela_filtrada['DAP'] >= 50,
-            tabela_filtrada['DAP'] < 50
+            (tabela_filtrada['DAP'] >= 50) & (tabela_filtrada['QUALIDADE'] < 3),
+            (tabela_filtrada['DAP'] < 50) & (tabela_filtrada['QUALIDADE'] < 3),
+            tabela_filtrada['QUALIDADE'] == 3
         ]
         resultados = [
-            'Selecionada para Corte acima de 70',
-            'Selecionada para Corte acima de 80',
-            'Remanescente Qualidade Inferior',
-            'Selecionada Para Corte',
-            'Remanescente Futuro',
-            'Selecionada para corte Maior que 50',
-            'Remanescente Futuro Menor que 50 - Diversas'
+            'Arvore Selecionada para corte',
+            'Arvore Selecionada para corte',
+            'Arvore Remanescente Qualidade Fuste 3',
+            'Arvore Selecionada para corte',
+            'Arvore Remanescente de Futuro',
+            'Arvore Selecionada para corte',
+            'Arvore Remanescente de Futuro',
+            'Arvore Remanescente Qualidade Fuste 3'
         ]
         
         '''
         Destinação:
             - ARVORE NA AREA DE PRESERVAÇÃO PERMANENTE
             - ARVORE PROTEGIDA
-            - REMANESCENTE QUALIDADE INFERIOR
+            - REMANESCENTE QUALIDADE INFERIOR PARA ARVORES GERAIS COM QUALIDADE 3
             - SELECIONADA PARA CORTE
             - REMANESCENTE FUTURO      
         '''
+        
+        
 
         # Aplica as classificações apenas nas linhas do grupo atual (UT)
         classificacoes = np.select(condicoes, resultados, default=df.loc[idx, 'CLASSIFICAÇÃO'])
