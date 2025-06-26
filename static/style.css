@@ -134,7 +134,7 @@ body {
 } */
 
 .modal {
-    display:none; position:fixed; z-index:2000; left:0; top:0; width:100vw; height:100vh; background:rgba(28, 28, 28, 0.758);
+    display:none; position:fixed; z-index:2000; left:0; top:0; width:100vw; height:100vh; color: #e8f4fd;
 }
 
 

@@ -15,6 +15,9 @@ PROCESSED_FOLDER = 'processed'
 VOLUME_FATOR = 0.001602
 VOLUME_EXPOENTE = 1.9
 
+# Lista inicial de árvores protegidas
+arvores_protegidas = ["ANDIROBA", "COPAIBA", "SERINGUEIRA", "CASTANHEIRA", "PAU ROSA"]
+
 # Garante que as pastas existam
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(PROCESSED_FOLDER, exist_ok=True)
@@ -248,23 +251,18 @@ def download_file(filename):
     """Fornece o arquivo processado para download."""
     return send_from_directory(app.config['PROCESSED_FOLDER'], filename, as_attachment=True)
 
-@app.route('/configuracoes', methods=['GET', 'POST'])
-def pagina_configuracoes():
-    global VOLUME_FATOR, VOLUME_EXPOENTE
-    if request.method == 'POST':
-        VOLUME_FATOR = float(request.form.get('fator', VOLUME_FATOR))
-        VOLUME_EXPOENTE = float(request.form.get('expoente', VOLUME_EXPOENTE))
-        return redirect(url_for('pagina_configuracoes'))
-    
-    # Passe os valores atuais de min_dap e max_dap se desejar
-    min_dap = 50  # ou recupere de algum lugar
-    max_dap = 100 # ou recupere de algum lugar
-    return render_template(
-        'config.html',
-        min_dap=min_dap,
-        max_dap=max_dap,
-        fator=VOLUME_FATOR,
-        expoente=VOLUME_EXPOENTE)
+@app.route('/config', methods=['GET'])
+def config():
+    return render_template('config.html', arvores_protegidas=arvores_protegidas)
+
+@app.route('/update_protegidas', methods=['POST'])
+def update_protegidas():
+    global arvores_protegidas
+    # Recebe a lista do formulário
+    arvores = request.form.getlist('arvores[]')
+    # Remove vazios e padroniza para maiúsculas
+    arvores_protegidas = [a.strip().upper() for a in arvores if a.strip()]
+    return redirect(url_for('config'))
 
 @app.route('/novo-projeto')
 def novo_projeto():

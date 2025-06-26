@@ -37,69 +37,62 @@
       </div>
     </header>
 
-    <!-- <div class="card">
+    <!-- ...existing code... -->
+    <div class="card">
       <h2>Informações Importantes</h2>
 
       <div class="criteria-info">
         <h3>Árvores Protegidas por Lei</h3>
-        <ul>
-          <li>ANDIROBA</li>
-          <li>
-           COPAIBA
-          </li>
-          <li>SERINGA</li>
-          <li>CASTANHEIRA</li>
-          <li> PAU ROSA</li>
-        </ul>
+        <form method="POST" action="{{ url_for('update_protegidas') }}">
+          <div id="arvores-lista">
+            {% for arvore in arvores_protegidas %}
+            <div class="input-group mb-2">
+              <input
+                type="text"
+                name="arvores[]"
+                class="form-control"
+                value="{{ arvore }}"
+                required
+              />
+              <button
+                type="button"
+                class="btn btn-danger"
+                onclick="removerCampo(this)"
+              >
+                Remover
+              </button>
+            </div>
+            {% endfor %}
+          </div>
+          <button
+            type="button"
+            class="btn btn-secondary mb-2"
+            onclick="adicionarCampo()"
+          >
+            Adicionar árvore
+          </button>
+          <button type="submit" class="btn btn-primary">
+            Salvar alterações
+          </button>
+        </form>
       </div>
     </div>
 
-    <div class="container mt-4">
-      <h2 class="text-center mb-4">Configurações de Análise</h2>
-      <form action="/config" method="post">
-        <div class="mb-3">
-          <label for="min_dap" class="form-label">Diâmetro Mínimo (DAP):</label>
-          <input
-            type="number"
-            class="form-control"
-            id="min_dap"
-            name="min_dap"
-            value="{{ min_dap }}"
-            required
-          />
-        </div>
-        <div class="mb-3">
-          <label for="max_dap" class="form-label">Diâmetro Máximo (DAP):</label>
-          <input
-            type="number"
-            class="form-control"
-            id="max_dap"
-            name="max_dap"
-            value="{{ max_dap }}"
-            required
-          />
-        </div>
-        <button type="submit" class="btn btn-primary">
-          Atualizar Configurações
-        </button>
-        <a href="/" class="btn btn-secondary ms-2">Voltar</a>
-      </form>
-      
-      <form method="post">
-        <label for="fator">Fator do Volume:</label>
-        <input type="number" step="any" name="fator" value="{{ fator }}" />
-        <br />
-        <label for="expoente">Expoente do Volume:</label>
-        <input
-          type="number"
-          step="any"
-          name="expoente"
-          value="{{ expoente }}"
-        />
-        <br />
-        <button type="submit">Salvar</button>
-      </form>
-    </div>
-  -->
+    <script>
+      function adicionarCampo() {
+        const lista = document.getElementById("arvores-lista");
+        const div = document.createElement("div");
+        div.className = "input-group mb-2";
+        div.innerHTML = `
+          <input type="text" name="arvores[]" class="form-control" required>
+          <button type="button" class="btn btn-danger" onclick="removerCampo(this)">Remover</button>
+        `;
+        lista.appendChild(div);
+      }
+      function removerCampo(btn) {
+        btn.parentElement.remove();
+      }
+    </script>
+    <!-- ...existing code... -->
   </body>
 </html>
