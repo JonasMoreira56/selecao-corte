@@ -54,11 +54,10 @@ def processar_arquivo_excel(caminho_arquivo, nome_arquivo_saida):
     # Convertida para Pandas:
     limite_inferior = ((df[coluna_g] // 10) * 10).astype(int)
     limite_superior = (limite_inferior + 10).astype(int)
-    #df['CLASSE DIAMETRICA'] = limite_inferior.astype(str) + '-' + limite_superior.astype(str)
-    
     classe_diametrica = limite_inferior.astype(str) + '-' + limite_superior.astype(str)
-    # Se o valor do DAP for maior que 100, mostra ">100"
-    #df['CLASSE DIAMETRICA'] = np.where(df[coluna_g] > 100, '>100', classe_diametrica)
+    
+    # Se o DAP for maior que 100, mostra ">100"
+    classe_diametrica = np.where(df['DAP'] >= 100, '>100', classe_diametrica)
     df['CLASSE DIAMETRICA'] = classe_diametrica
     
     # --- 3. Cálculo do Volume do Iventário ---
@@ -182,7 +181,9 @@ def classificar_ut(nome_arquivo_processado):
         # Aplica as classificações apenas nas linhas do grupo atual (UT)
         classificacoes = np.select(condicoes, resultados, default=df.loc[idx, 'CLASSIFICAÇÃO'])
         df.loc[idx, 'CLASSIFICAÇÃO'] = classificacoes
-            
+    
+    # Se o valor do DAP for maior que 100, mostra ">100"
+                
 
     # Salva o DataFrame atualizado
     df.to_excel(caminho_arquivo, index=False)
