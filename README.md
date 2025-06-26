@@ -62,6 +62,10 @@ Este projeto é uma aplicação web para processar arquivos de inventário flore
 Este projeto é de uso interno da Mil Madeiras Preciosas.
 
 ---
+## Ajuda
+
+- Dúvidas frequentes: [FAQ](docs/FAQ.md)
+- Contato: jonasmoreira076@gmail.com
 
 Desenvolvido por Jonas Moreira TI - Mil Madeiras
 <p align="left">
