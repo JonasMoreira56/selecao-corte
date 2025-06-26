@@ -13,6 +13,7 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='style.css') }}"
     />
+    
   </head>
   <body>
     <header class="header">
@@ -32,13 +33,15 @@
         </div>
         <div class="header-buttons">
           <a href="javascript:history.back()" class="btn btn-secondary">Voltar</a>
+          <a href="javascript:history.back()" class="btn btn-primary">Salvar Projeto</a>
+
         </div>
       </div>
     </header>
 
 
      <div class="card">
-      <h2>Resultados da Análise</h2>
+      <h2>Resultados da Análise 2° Seleção</h2>
       
       <div class="results-area-resul" id="resultsArea">
         {% if resultado %}

@@ -212,7 +212,7 @@ def upload_file():
         file.save(caminho_original)
 
         # Define um nome para o arquivo processado
-        nome_arquivo_processado = f"selecionado_corte_{filename}"
+        nome_arquivo_processado = f"selecao_UPA_{filename}"
         
         # Chama a função de processamento
         # e salva o arquivo processado na pasta 'processed'
