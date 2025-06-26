@@ -13,6 +13,7 @@ Este projeto é uma aplicação web para processar arquivos de inventário flore
 - Download do arquivo processado
 - Visualização dos resultados na interface
 - Configuração dos parâmetros de cálculo (fator e expoente do volume)
+- Edição dinâmica das espécies protegidas via interface de configurações
 
 ## Tecnologias Utilizadas
 
@@ -21,40 +22,50 @@ Este projeto é uma aplicação web para processar arquivos de inventário flore
 - [numpy](https://numpy.org/) — Operações matemáticas e científicas
 - [Bootstrap](https://getbootstrap.com/) — Estilização da interface
 
-
 ## Estrutura do Projeto
 
 - `app.py`: Código principal da aplicação Flask
+- `controllers/`: Lógica de controle e rotas da aplicação
+- `models/`: Funções de processamento e regras de negócio
 - `templates/`: Páginas HTML (interface)
 - `static/`: Arquivos estáticos (CSS, JS, imagens)
 - `uploads/`: Arquivos enviados pelo usuário
 - `processed/`: Arquivos processados para download
+- `instance/`: Banco de dados SQLite de usuários (futuro)
 
 ## Como rodar o projeto
 
-<!-- 1. **Pré-requisitos**  
+1. **Pré-requisitos**  
    - Python 3.10+  
    - Instale as dependências:
      ```sh
-     pip install flask flask_sqlalchemy flask_login pandas numpy openpyxl
+     pip install -r requirements.txt
      ```
 
 2. **Executando a aplicação**
-   ```sh
-   python app.py
-   ```
-   Acesse em [http://localhost:5000](http://localhost:5000) -->
+   - Para ambiente de desenvolvimento:
+     ```sh
+     python app.py
+     ```
+     Acesse em [http://localhost:5000](http://localhost:5000)
 
-1. **Uso**
-   - Faça upload do arquivo Excel de inventário na página inicial.
-   - Aguarde o processamento e visualize os resultados.
-   - Baixe o arquivo processado.
-   - Ajuste os parâmetros de cálculo em `/configuracoes` se necessário.
+   - Para produção (Heroku/Render):
+     ```
+     gunicorn app:app
+     ```
+
+## Uso
+
+- Faça upload do arquivo Excel de inventário na página inicial.
+- Aguarde o processamento e visualize os resultados.
+- Baixe o arquivo processado.
+- Para aplicar a classificação por UT, clique em "Aplicar Classificação por UT" após o processamento inicial.
+- Ajuste as espécies protegidas e outros parâmetros em `/config`.
 
 ## Observações
 
-- O arquivo Excel deve conter as colunas esperadas pelo sistema (ex: `CAP`, `DAP`, `FATOR`, `fid`, `Data`, `APP`).
-- Os nomes das colunas podem ser ajustados no código conforme o padrão do seu inventário.
+- O arquivo Excel deve conter as colunas esperadas pelo sistema (ex: `CAP`, `DAP`, `FATOR`, `fid`, `DATA INVENTARIO`, `APP`, `ESPECIE`, `UT`, `QUALIDADE`).
+- Os nomes das colunas podem ser ajustados no código conforme o padrão do seu inventário ([models/processamento.py](models/processamento.py)).
 - O sistema utiliza Bootstrap para o layout e pandas para manipulação dos dados.
 
 ## Licença
