@@ -43,7 +43,7 @@
 
       <div class="criteria-info">
         <h3>Árvores Protegidas por Lei</h3>
-        <form method="POST" action="{{ url_for('update_protegidas') }}">
+        <form method="POST" action="{{ url_for('main.update_protegidas') }}">
           <div id="arvores-lista">
             {% for arvore in arvores_protegidas %}
             <div class="input-group mb-2">
