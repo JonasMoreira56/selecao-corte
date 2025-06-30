@@ -1,11 +1,6 @@
 # import os
-# import pandas as pd
-# import numpy as np
 
-# VOLUME_FATOR = 0.001602
-# VOLUME_EXPOENTE = 1.9
-
-# # --- Função para aplicar as regras de negócio ---
+# # --- Função para aplicar as regras de negócio e salvar localmente ---
 # def processar_arquivo_excel(caminho_arquivo, nome_arquivo_saida, processed_folder):
 #     """
 #     Lê um arquivo Excel, aplica as regras de negócio e salva um novo arquivo.
@@ -159,7 +154,7 @@
 #     df.to_excel(caminho_arquivo, index=False)
 
 
-# Salva o arquivo processado no banco de dados
+# -- -Salva o arquivo processado no banco de dados ---
 from io import BytesIO
 import pandas as pd
 import numpy as np
