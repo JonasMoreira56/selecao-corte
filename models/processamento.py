@@ -212,6 +212,8 @@ def processar_arquivo_excel_bytes(conteudo_bytes, nome_arquivo_saida, mimetype='
 
     if 'OBSERVAÇÃO' in df.columns:
         df['OBSERVAÇÃO'] = df['OBSERVAÇÃO'].replace('NULO','Não Possui')
+    
+    # --- Fim do processamento ---
 
     # Salva o DataFrame modificado em memória
     output = BytesIO()
