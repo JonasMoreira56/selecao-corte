@@ -173,14 +173,18 @@ def processar_arquivo_excel_bytes(conteudo_bytes, nome_arquivo_saida, mimetype='
 
     # --- (todo o processamento igual ao seu código atual) ---
     coluna_cap = 'CAP'
-    coluna_g = 'DAP'
+    coluna_dap = 'DAP'
     coluna_fator = 'FATOR'
-
+    
+    # remover colunas desnecessárias
+    df['fid'] = df['fid'].astype(str)
+    df = df.drop(columns=['fid'], errors='ignore')
+    
     df['DAP'] = df[coluna_cap] / np.pi
     df['DAP'] = df['DAP'].round(0)
     df['FATOR'] = df[coluna_fator].apply(lambda x: f"{float(x):.2f}")
 
-    limite_inferior = ((df[coluna_g] // 10) * 10).astype(int)
+    limite_inferior = ((df[coluna_dap] // 10) * 10).astype(int)
     limite_superior = (limite_inferior + 10).astype(int)
     classe_diametrica = limite_inferior.astype(str) + '-' + limite_superior.astype(str)
     classe_diametrica = np.where(df['DAP'] >= 100, '>100', classe_diametrica)
@@ -207,7 +211,7 @@ def processar_arquivo_excel_bytes(conteudo_bytes, nome_arquivo_saida, mimetype='
     df['CLASSIFICAÇÃO'] = np.select(condicoes, resultados, default='Pendente de Analise')
 
     if 'OBSERVAÇÃO' in df.columns:
-        df['OBSERVAÇÃO'] = df['OBSERVAÇÃO'].replace('NULO','OK')
+        df['OBSERVAÇÃO'] = df['OBSERVAÇÃO'].replace('NULO','Não Possui')
 
     # Salva o DataFrame modificado em memória
     output = BytesIO()
