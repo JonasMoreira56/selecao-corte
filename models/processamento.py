@@ -254,31 +254,95 @@ def classificar_ut_bytes(nome_arquivo_processado, mimetype='application/vnd.open
         especies_acima80 = ["CUMA", "CUVE"]
 
         condicoes = [
+            # 1. Espécies acima de 70cm de DAP e qualidade < 3
             (tabela_filtrada['ESPECIE'].isin(especies_acima70)) & (tabela_filtrada['DAP'] >= 70) & (tabela_filtrada['QUALIDADE'] < 3),
+            # 1b. Espécies acima de 70cm de DAP e qualidade < 3, mas DAP < 70 (Remanescente Futuro)
+            (tabela_filtrada['ESPECIE'].isin(especies_acima70)) & (tabela_filtrada['DAP'] < 70),
+            # 2. Espécies acima de 80cm de DAP e qualidade < 3
             (tabela_filtrada['ESPECIE'].isin(especies_acima80)) & (tabela_filtrada['DAP'] >= 80) & (tabela_filtrada['QUALIDADE'] < 3),
+            # 2b. Espécies acima de 80cm de DAP e qualidade < 3, mas DAP < 80 (Remanescente Futuro)
+            (tabela_filtrada['ESPECIE'].isin(especies_acima80)) & (tabela_filtrada['DAP'] < 80),
+            # 3. Espécies de porte com qualidade 3 (sempre remanescente)
             (tabela_filtrada['ESPECIE'].isin(especies_porte)) & (tabela_filtrada['QUALIDADE'] == 3),
+            # 4. Espécies de porte com DAP entre 30 e 50
             (tabela_filtrada['ESPECIE'].isin(especies_porte)) & (tabela_filtrada['DAP'] >= 30) & (tabela_filtrada['DAP'] <= 50),
             (tabela_filtrada['ESPECIE'].isin(especies_porte)) & (tabela_filtrada['DAP'] < 30),
             (tabela_filtrada['DAP'] >= 50) & (tabela_filtrada['QUALIDADE'] < 3),
-            (tabela_filtrada['DAP'] < 50) & (tabela_filtrada['QUALIDADE'] < 3),
-            tabela_filtrada['QUALIDADE'] == 3
+            (tabela_filtrada['DAP'] < 50),
+            (tabela_filtrada['DAP'] > 50) & (tabela_filtrada['QUALIDADE'] == 3)
+                     
         ]
         resultados = [
-            'Arvore Selecionada para corte',
-            'Arvore Selecionada para corte',
+            'Pendente de Analise',
+            'Arvore Remanescente de Futuro',
+            'Arvore Remanescente de Futuro',
+            'Pendente de Analise',
             'Arvore Remanescente Qualidade Fuste 3',
-            'Arvore Selecionada para corte',
+            'Pendente de Analise',
             'Arvore Remanescente de Futuro',
-            'Arvore Selecionada para corte',
+            'Pendente de Analise',
             'Arvore Remanescente de Futuro',
-            'Arvore Remanescente Qualidade Fuste 3'
+            'Arvore Qualidade Fuste 3'
         ]
 
         classificacoes = np.select(condicoes, resultados, default=df.loc[idx, 'CLASSIFICAÇÃO'])
         df.loc[idx, 'CLASSIFICAÇÃO'] = classificacoes
+        
+        #  Para Arvores Porta Semente:
+        #     1° Filtrar por UT e selecionadas para corte
+	    #     2° Filtrar por tipo de arvore e contabilizar a quantidade que possui (porta-selecionada), tirar 10% do total de arvores contabilizadas por espécie (porta-selecionada)
+        #     3° Se o valor em % for menor que 3, seleciono o valor 3 para essa arvore Porta_Semente e para 
+        #     para possivel_selecionada faco o calculo porta-selecionada - porta-semente 
+        #     4° Se o valor em % da quantidade de arvores selecionadas for maior que 3, arrendondo o valor da % para inteiro e defino essa quantidade como porta-semente,
+        #     e para possivel_selecionada faco o calculo porta-selecionada - porta-semente nesse caso é o que sobrou do total de arvores portas selecionadas
+        #     5° Se o valor em % da quantidade de arvores selecionadas for menor que 3, então defino essa arvore como como rara, não podendo ser selecionada para corte
+           
+        # --- Porta Semente e Rara por espécie ---
+        # Considera apenas árvores selecionadas para corte, excluindo APP, protegidas e qualidade 3
+        selecionadas = tabela_filtrada[
+            (df.loc[idx, 'CLASSIFICAÇÃO'] == 'Pendente de Analise') &
+            (tabela_filtrada['QUALIDADE'] < 3)
+        ]
+
+        especies_15 = ["ANCA", "CUMA", "CUVE", "IPE"]
+        
+        especies_selecionadas = selecionadas['ESPECIE'].unique()
+        # ...existing code...
+        for especie in especies_selecionadas:
+            arvores_especie = selecionadas[selecionadas['ESPECIE'] == especie]
+            total = len(arvores_especie)
+
+            if especie in especies_15:
+                if total <= 4:
+                    # Marca todas como rara
+                    df.loc[arvores_especie.index, 'CLASSIFICAÇÃO'] = 'Arvore Rara'
+                    continue
+                percentual = 0.15
+            else:
+                if total <= 3:
+                    df.loc[arvores_especie.index, 'CLASSIFICAÇÃO'] = 'Arvore Rara'
+                    continue
+                percentual = 0.10
+
+            n_porta_semente = max(3, int(np.ceil(total * percentual)))
+            # se o n_porta_semente for maior que 3.0 arredondo para cima
+            n_porta_semente = int(np.ceil(n_porta_semente))
+            # 1. Encontrar a classe diamétrica com mais indivíduos
+            classe_mais_freq = arvores_especie['CLASSE DIAMETRICA'].mode()[0]
+            arvores_classe = arvores_especie[arvores_especie['CLASSE DIAMETRICA'] == classe_mais_freq]
+            # 2. Priorizar qualidade 2 e menor volume
+            arvores_qualidade2 = arvores_classe[arvores_classe['QUALIDADE'] == 2].sort_values(by='VOLUME INVENTARIO', ascending=True)
+            arvores_outros = arvores_classe[arvores_classe['QUALIDADE'] != 2].sort_values(by='VOLUME INVENTARIO', ascending=True)
+            # 3. Selecionar os porta-semente
+            arvores_selecionadas = pd.concat([arvores_qualidade2, arvores_outros])
+            idx_porta_semente = arvores_selecionadas.head(n_porta_semente).index
+            df.loc[idx_porta_semente, 'CLASSIFICAÇÃO'] = 'Porta Semente'
+        # ...existing code...    
+
+      
 
     # Salva o DataFrame atualizado em memória
-    output = BytesIO()
+    output = BytesIO()  
     df.to_excel(output, index=False)
     output.seek(0)
     conteudo_classificado = output.read()
