@@ -3,3 +3,5 @@ venv/
 processed/
 uploads/
 __pycache__/app.cpython-313.pyc
+__pycache__/app.cpython-313.pyc
+instance/usuarios.db
