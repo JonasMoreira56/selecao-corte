@@ -171,7 +171,6 @@ def processar_arquivo_excel_bytes(conteudo_bytes, nome_arquivo_saida, mimetype='
     # Carrega a planilha em um DataFrame do Pandas
     df = pd.read_excel(BytesIO(conteudo_bytes))
 
-    # --- (todo o processamento igual ao seu código atual) ---
     coluna_cap = 'CAP'
     coluna_dap = 'DAP'
     coluna_fator = 'FATOR'
@@ -199,7 +198,7 @@ def processar_arquivo_excel_bytes(conteudo_bytes, nome_arquivo_saida, mimetype='
 
     df['DATA INVENTARIO'] = pd.to_datetime(df['DATA INVENTARIO']).dt.strftime('%d/%m/%Y')
 
-    especies_protegidas = ["SERI", "ANDI", "COPA", "CAST", "PARO", "PAA", "SOVA"]
+    especies_protegidas = ["SERI", "ANDI", "COPA", "CAST", "PARO", "PAAM", "SOVA", "PREC"]
     condicoes = [
         df['APP'].str.upper() == 'SIM',
         df['ESPECIE'].str.upper().isin(especies_protegidas)
@@ -208,10 +207,30 @@ def processar_arquivo_excel_bytes(conteudo_bytes, nome_arquivo_saida, mimetype='
         'Arvore na area de preservacao permanente',
         'Arvore protegida'
     ]
-    df['CLASSIFICAÇÃO'] = np.select(condicoes, resultados, default='Pendente de Analise')
+    df['CLASSIFICAÇÃO'] = np.select(condicoes, resultados, default='Selecionada para corte')
 
     if 'OBSERVAÇÃO' in df.columns:
         df['OBSERVAÇÃO'] = df['OBSERVAÇÃO'].replace('NULO','Não Possui')
+        
+
+    # Nova coluna DMC: verifica o critério por espécie
+    def verifica_dmc(row):
+        especie = row['ESPECIE'].upper()
+        dap = row['DAP']
+        if especie in ['ABIU', 'MATA']:
+            return 'Atende' if dap >= 30 else 'Não Atende'
+        elif especie == 'ACAR':
+            return 'Atende' if dap >= 25 else 'Não Atende'
+        elif especie in ['CUMA', 'CUVE']:
+            return 'Atende' if dap >= 80 else 'Não Atende'
+        elif especie in ['IPRO', 'IPAM']:
+            return 'Atende' if dap >= 70 else 'Não Atende'
+        elif row['CLASSIFICAÇÃO'] == 'Arvore protegida':
+            return 'Protegida'
+        else:
+            return 'Atende' if dap >= 50 else 'Não Atende'
+
+    df['DMC'] = df.apply(verifica_dmc, axis=1)
     
     # --- Fim do processamento ---
 
@@ -273,14 +292,14 @@ def classificar_ut_bytes(nome_arquivo_processado, mimetype='application/vnd.open
                      
         ]
         resultados = [
-            'Pendente de Analise',
+            'Selecionada para corte',
             'Arvore Remanescente de Futuro',
             'Arvore Remanescente de Futuro',
-            'Pendente de Analise',
+            'Selecionada para corte',
             'Arvore Remanescente Qualidade Fuste 3',
-            'Pendente de Analise',
+            'Selecionada para corte',
             'Arvore Remanescente de Futuro',
-            'Pendente de Analise',
+            'Selecionada para corte',
             'Arvore Remanescente de Futuro',
             'Arvore Qualidade Fuste 3'
         ]
@@ -300,7 +319,7 @@ def classificar_ut_bytes(nome_arquivo_processado, mimetype='application/vnd.open
         # --- Porta Semente e Rara por espécie ---
         # Considera apenas árvores selecionadas para corte, excluindo APP, protegidas e qualidade 3
         selecionadas = tabela_filtrada[
-            (df.loc[idx, 'CLASSIFICAÇÃO'] == 'Pendente de Analise') &
+            (df.loc[idx, 'CLASSIFICAÇÃO'] == 'Selecionada para corte') &
             (tabela_filtrada['QUALIDADE'] < 3)
         ]
 
@@ -324,9 +343,12 @@ def classificar_ut_bytes(nome_arquivo_processado, mimetype='application/vnd.open
                     continue
                 percentual = 0.10
 
-            n_porta_semente = max(3, int(np.ceil(total * percentual)))
-            # se o n_porta_semente for maior que 3.0 arredondo para cima
-            n_porta_semente = int(np.ceil(n_porta_semente))
+            valor_calculado = total * percentual
+            if valor_calculado <= 3:
+                n_porta_semente = 3
+            else:
+                n_porta_semente = int(np.ceil(valor_calculado))  # Arredonda para cima
+            
             # 1. Encontrar a classe diamétrica com mais indivíduos
             classe_mais_freq = arvores_especie['CLASSE DIAMETRICA'].mode()[0]
             arvores_classe = arvores_especie[arvores_especie['CLASSE DIAMETRICA'] == classe_mais_freq]
@@ -335,9 +357,8 @@ def classificar_ut_bytes(nome_arquivo_processado, mimetype='application/vnd.open
             arvores_outros = arvores_classe[arvores_classe['QUALIDADE'] != 2].sort_values(by='VOLUME INVENTARIO', ascending=True)
             # 3. Selecionar os porta-semente
             arvores_selecionadas = pd.concat([arvores_qualidade2, arvores_outros])
-            idx_porta_semente = arvores_selecionadas.head(n_porta_semente).index
-            df.loc[idx_porta_semente, 'CLASSIFICAÇÃO'] = 'Porta Semente'
-        # ...existing code...    
+            idx_porta_semente = arvores_selecionadas.head(n_porta_semente).index    
+            df.loc[idx_porta_semente, 'CLASSIFICAÇÃO'] = 'Porta Semente'  
 
       
 
