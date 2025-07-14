@@ -259,6 +259,7 @@ def classificar_ut_bytes(nome_arquivo_processado, mimetype='application/vnd.open
 
     for valor in df['UT'].unique():
         tabela = df[df['UT'] == valor]
+        print(f"\n--- UT: {valor} ---")
 
         # Filtra apenas árvores que NÃO são APP nem protegidas
         filtro_nao_app_protegida = ~(
@@ -344,22 +345,43 @@ def classificar_ut_bytes(nome_arquivo_processado, mimetype='application/vnd.open
                 percentual = 0.10
 
             valor_calculado = total * percentual
-            if valor_calculado <= 3:
+            print(f"Valor Calculado para {especie}: {valor_calculado} (Total: {total}, Percentual: {percentual})")
+            valor_calculado = round(float(total) * float(percentual), 6)  # arredonda para evitar erro de precisão
+            print(f"Valor Calculado float para {especie}: {valor_calculado} (Total: {total}, Percentual: {percentual})")
+            
+            if valor_calculado < 3:
                 n_porta_semente = 3
-            else:
-                n_porta_semente = int(np.ceil(valor_calculado))  # Arredonda para cima
+            else:   
+                # Arredonda para cima
+                n_porta_semente = int(np.ceil(valor_calculado))
+                print(f"arredondado para o inteiro mais proximo: {n_porta_semente}")
+            
             
             # 1. Encontrar a classe diamétrica com mais indivíduos
-            classe_mais_freq = arvores_especie['CLASSE DIAMETRICA'].mode()[0]
-            arvores_classe = arvores_especie[arvores_especie['CLASSE DIAMETRICA'] == classe_mais_freq]
+            # classe_mais_freq = arvores_especie['CLASSE DIAMETRICA'].mode()[0]
+            arvores_classe = arvores_especie
             # 2. Priorizar qualidade 2 e menor volume
             arvores_qualidade2 = arvores_classe[arvores_classe['QUALIDADE'] == 2].sort_values(by='VOLUME INVENTARIO', ascending=True)
             arvores_outros = arvores_classe[arvores_classe['QUALIDADE'] != 2].sort_values(by='VOLUME INVENTARIO', ascending=True)
             # 3. Selecionar os porta-semente
             arvores_selecionadas = pd.concat([arvores_qualidade2, arvores_outros])
             idx_porta_semente = arvores_selecionadas.head(n_porta_semente).index    
-            df.loc[idx_porta_semente, 'CLASSIFICAÇÃO'] = 'Porta Semente'  
-
+            df.loc[idx_porta_semente, 'CLASSIFICAÇÃO'] = 'Porta Semente'
+            
+            # Após classificar porta semente, exibe resumo das árvores selecionadas para corte e porta semente'
+        # selecionadas_corte = df[(df['UT'] == 1) & (df['CLASSIFICAÇÃO'] == 'Selecionada para corte') & (df['ESPECIE'] == 'CUMA')]
+        # porta_semente = df[(df['UT'] == 1) & (df['CLASSIFICAÇÃO'] == 'Porta Semente')  & (df['ESPECIE'] == 'CUMA')]
+        # print(f"\nResumo UT {valor}:")
+        # # print(f"Selecionadas para corte ({len(selecionadas_corte)}):")
+        # # print(selecionadas_corte[['ESPECIE', 'DAP', 'QUALIDADE', 'CLASSE DIAMETRICA']])
+        # print(f"Porta Semente ({len(porta_semente)}):")
+        # print(porta_semente[['ESPECIE', 'DAP', 'QUALIDADE', 'CLASSE DIAMETRICA']])
+                
+        # print("Resumo final para CUMA:")
+        # print(
+        #         f"UT: {1} | Total: {total} | Percentual: {percentual} | "
+        #         f"Valor calculado: {valor_calculado} | Porta-semente: {n_porta_semente}"
+        #     )
       
 
     # Salva o DataFrame atualizado em memória
