@@ -20,8 +20,9 @@ def processar_arquivo_excel_bytes(conteudo_bytes, nome_arquivo_saida, mimetype='
     coluna_fator = 'FATOR'
     
     # remover colunas desnecessárias
-    df['fid'] = df['fid'].astype(str)
-    df = df.drop(columns=['fid'], errors='ignore')
+    if 'fid' in df.columns:
+        df['fid'] = df['fid'].astype(str)
+        df = df.drop(columns=['fid'], errors='ignore')
     
     df['DAP'] = df[coluna_cap] / np.pi
     df['DAP'] = df['DAP'].round(0)
