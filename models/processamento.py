@@ -144,8 +144,9 @@ def classificar_ut_bytes(nome_arquivo_processado, mimetype='application/vnd.open
             
             # 6. Espécies gerais com DAP acima de 50
             (tabela_filtrada['DAP'] >= 50) & (tabela_filtrada['QUALIDADE'] < 3),
+            (tabela_filtrada['DAP'] < 50) & (tabela_filtrada['QUALIDADE'] == 3),
             (tabela_filtrada['DAP'] < 50),
-            (tabela_filtrada['DAP'] > 50) & (tabela_filtrada['QUALIDADE'] == 3)
+            (tabela_filtrada['DAP'] >= 50) & (tabela_filtrada['QUALIDADE'] == 3)
                      
         ]
         resultados = [
@@ -173,6 +174,7 @@ def classificar_ut_bytes(nome_arquivo_processado, mimetype='application/vnd.open
             
             # 6. Espécies gerais com DAP acima de 50
             'Selecionada para corte',
+            'Arvore Remanescente Qualidade Fuste 3',
             'Arvore Remanescente de Futuro',
             'Arvore Qualidade Fuste 3'
         ]
@@ -226,9 +228,9 @@ def classificar_ut_bytes(nome_arquivo_processado, mimetype='application/vnd.open
             idx_porta_semente = arvores_selecionadas.head(n_porta_semente).index
             df.loc[idx_porta_semente, 'CLASSIFICAÇÃO'] = 'Porta Semente'
 
-            print("Resumo final para CUMA:")
-            print(f"UT: {1} | Total: {total} | Percentual: {percentual}")
-            print(f"Valor calculado: {valor_calculado} | Porta-semente: {n_porta_semente}")
+            # print("Resumo final para CUMA:")
+            # print(f"UT: {1} | Total: {total} | Percentual: {percentual}")
+            # print(f"Valor calculado: {valor_calculado} | Porta-semente: {n_porta_semente}")
         
 
     # Salva o DataFrame atualizado em memória
