@@ -109,6 +109,10 @@ body {
   font-weight: bold;
   cursor: pointer;
 }
+
+img {
+    cursor: pointer;
+}
 /* ...existing code... */
 
 /* Estilização do conteúdo do footer */
