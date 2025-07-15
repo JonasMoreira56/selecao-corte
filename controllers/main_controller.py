@@ -43,7 +43,7 @@ def upload_file():
         salvar_arquivo(filename, conteudo, mimetype)
 
         # Processa e salva o processado no banco
-        nome_arquivo_saida = f"selecao_UPA_{filename}"
+        nome_arquivo_saida = f"UPA_{filename}"
         conteudo_processado = processar_arquivo_excel_bytes(conteudo, nome_arquivo_saida, mimetype)
 
         # Exemplo: mostrar preview do processado

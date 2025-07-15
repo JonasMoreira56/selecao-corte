@@ -40,7 +40,6 @@ def processar_arquivo_excel_bytes(conteudo_bytes, nome_arquivo_saida, mimetype='
     df['FATOR'] = pd.to_numeric(df['FATOR'], errors='coerce')
     df['VOLUME CORRIGIDO'] = (df['VOLUME INVENTARIO'] * df['FATOR']).map(lambda x: f"{x:.2f}")
 
-    df['DATA INVENTARIO'] = pd.to_datetime(df['DATA INVENTARIO']).dt.strftime('%d/%m/%Y')
 
     especies_protegidas = ["SERI", "ANDI", "COPA", "CAST", "PARO", "PAAM", "SOVA", "PREC"]
     condicoes = [
@@ -52,11 +51,8 @@ def processar_arquivo_excel_bytes(conteudo_bytes, nome_arquivo_saida, mimetype='
         'Arvore protegida'
     ]
     df['CLASSIFICAÇÃO'] = np.select(condicoes, resultados, default='Selecionada para corte')
-
-    if 'OBSERVAÇÃO' in df.columns:
-        df['OBSERVAÇÃO'] = df['OBSERVAÇÃO'].replace('NULO','Não Possui')
-        
-
+    
+    
     # Nova coluna DMC: verifica o critério por espécie
     def verifica_dmc(row):
         especie = row['ESPECIE'].upper()
@@ -76,6 +72,32 @@ def processar_arquivo_excel_bytes(conteudo_bytes, nome_arquivo_saida, mimetype='
 
     df['DMC'] = df.apply(verifica_dmc, axis=1)
     
+    # coloca a coluna DATA INVENTARIO para o final
+    if 'DATA INVENTARIO' in df.columns:
+        df['DATA INVENTARIO'] = pd.to_datetime(df['DATA INVENTARIO']).dt.strftime('%d/%m/%Y')
+        # 2. Move a coluna 'OBSERVAÇÃO' para o final
+        # Cria uma lista com todas as colunas
+        cols = list(df.columns)
+        # Remove a coluna 'OBSERVAÇÃO' da sua posição atual
+        cols.remove('DATA INVENTARIO')
+        # Adiciona 'OBSERVAÇÃO' ao final da lista de colunas
+        cols.append('DATA INVENTARIO')
+        # Reordena o DataFrame usando a nova lista de colunas
+        df = df[cols]
+    
+    # coloca a coluna observação para o final
+    if 'OBSERVAÇÃO' in df.columns:
+        df['OBSERVAÇÃO'] = df['OBSERVAÇÃO'].replace('NULO','Não Possui')
+        # 2. Move a coluna 'OBSERVAÇÃO' para o final
+        # Cria uma lista com todas as colunas
+        cols = list(df.columns)
+        # Remove a coluna 'OBSERVAÇÃO' da sua posição atual
+        cols.remove('OBSERVAÇÃO')
+        # Adiciona 'OBSERVAÇÃO' ao final da lista de colunas
+        cols.append('OBSERVAÇÃO')
+        # Reordena o DataFrame usando a nova lista de colunas
+        df = df[cols]
+
     # --- Fim do processamento ---
 
     # Salva o DataFrame modificado em memória
@@ -235,7 +257,7 @@ def classificar_ut_bytes(nome_arquivo_processado, mimetype='application/vnd.open
 
     # Salva o DataFrame atualizado em memória
     output = BytesIO()  
-    df.to_excel(output, index=False)
+    df.to_excel(output, sheet_name='Inventario', index=False)
     output.seek(0)
     conteudo_classificado = output.read()
 
