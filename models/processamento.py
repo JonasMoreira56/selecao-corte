@@ -113,38 +113,65 @@ def classificar_ut_bytes(nome_arquivo_processado, mimetype='application/vnd.open
         tabela_filtrada = tabela[filtro_nao_app_protegida]
         idx = tabela_filtrada.index
 
-        especies_porte = ["ACAR", "ABIU", "MATA"]
+        especies_porte_dmc_30 = ["ABIU", "MATA"]
+        especies_porte_dmc25 = ["ACAR"]
         especies_acima70 = ["IPAM", "IPRO"]
         especies_acima80 = ["CUMA", "CUVE"]
 
         # Condições para classificação
         condicoes = [
-            # 1. Espécies acima de 70cm de DAP e qualidade < 3
+            # 1. Espécies com DAP acima de 70cm ("IPAM", "IPRO")
             (tabela_filtrada['ESPECIE'].isin(especies_acima70)) & (tabela_filtrada['DAP'] >= 70) & (tabela_filtrada['QUALIDADE'] < 3),
-            # 1b. Espécies acima de 70cm de DAP e qualidade < 3, mas DAP < 70 (Remanescente Futuro)
+            (tabela_filtrada['ESPECIE'].isin(especies_acima70)) & (tabela_filtrada['DAP'] < 70) & (tabela_filtrada['QUALIDADE'] == 3),
             (tabela_filtrada['ESPECIE'].isin(especies_acima70)) & (tabela_filtrada['DAP'] < 70),
-            # 2. Espécies acima de 80cm de DAP e qualidade < 3
+            
+            # 2. Espécies com DAP acima de 80cm ("CUMA", "CUVE")
             (tabela_filtrada['ESPECIE'].isin(especies_acima80)) & (tabela_filtrada['DAP'] >= 80) & (tabela_filtrada['QUALIDADE'] < 3),
-            # 2b. Espécies acima de 80cm de DAP e qualidade < 3, mas DAP < 80 (Remanescente Futuro)
+            (tabela_filtrada['ESPECIE'].isin(especies_acima80)) & (tabela_filtrada['DAP'] < 80) & (tabela_filtrada['QUALIDADE'] == 3),
             (tabela_filtrada['ESPECIE'].isin(especies_acima80)) & (tabela_filtrada['DAP'] < 80),
-            # 3. Espécies de porte com qualidade 3 (sempre remanescente)
-            (tabela_filtrada['ESPECIE'].isin(especies_porte)) & (tabela_filtrada['QUALIDADE'] == 3),
-            # 4. Espécies de porte com DAP entre 30 e 50
-            (tabela_filtrada['ESPECIE'].isin(especies_porte)) & (tabela_filtrada['DAP'] >= 30) & (tabela_filtrada['DAP'] <= 50),
-            (tabela_filtrada['ESPECIE'].isin(especies_porte)) & (tabela_filtrada['DAP'] < 30),
+            
+            # 3. Espécies de porte para corte com DAP acima de 30 e qualidade ("ABIU", "MATA")
+            (tabela_filtrada['ESPECIE'].isin(especies_porte_dmc_30)) & (tabela_filtrada['DAP'] >= 30) & (tabela_filtrada['DAP'] <= 50) & (tabela_filtrada['QUALIDADE'] < 3),
+            (tabela_filtrada['ESPECIE'].isin(especies_porte_dmc_30)) & (tabela_filtrada['DAP'] < 30) & (tabela_filtrada['QUALIDADE'] == 3),
+            (tabela_filtrada['ESPECIE'].isin(especies_porte_dmc_30)) & (tabela_filtrada['DAP'] < 30),
+            (tabela_filtrada['ESPECIE'].isin(especies_porte_dmc_30)) & (tabela_filtrada['DAP'] >= 30) & (tabela_filtrada['QUALIDADE'] == 3),
+            
+            # 5. Espécies de porte para corte com DAP acima de 25 ("ACAR")
+            (tabela_filtrada['ESPECIE'].isin(especies_porte_dmc25)) & (tabela_filtrada['DAP'] >= 25) & (tabela_filtrada['QUALIDADE'] < 3),
+            (tabela_filtrada['ESPECIE'].isin(especies_porte_dmc25)) & (tabela_filtrada['DAP'] < 25) & (tabela_filtrada['QUALIDADE'] == 3),
+            (tabela_filtrada['ESPECIE'].isin(especies_porte_dmc25)) & (tabela_filtrada['DAP'] < 25),
+            (tabela_filtrada['ESPECIE'].isin(especies_porte_dmc25)) & (tabela_filtrada['DAP'] >= 25) & (tabela_filtrada['QUALIDADE'] == 3),
+            
+            # 6. Espécies gerais com DAP acima de 50
             (tabela_filtrada['DAP'] >= 50) & (tabela_filtrada['QUALIDADE'] < 3),
             (tabela_filtrada['DAP'] < 50),
             (tabela_filtrada['DAP'] > 50) & (tabela_filtrada['QUALIDADE'] == 3)
                      
         ]
         resultados = [
-            'Selecionada para corte',
-            'Arvore Remanescente de Futuro',
-            'Arvore Remanescente de Futuro',
+            # 1. Espécies com DAP acima de 70cm ("IPAM", "IPRO")
             'Selecionada para corte',
             'Arvore Remanescente Qualidade Fuste 3',
-            'Selecionada para corte',
             'Arvore Remanescente de Futuro',
+            
+            # 2. Espécies com DAP acima de 80cm ("CUMA", "CUVE")
+            'Selecionada para corte',
+            'Arvore Remanescente Qualidade Fuste 3',
+            'Arvore Remanescente de Futuro',
+            
+            # 3. Espécies de porte para corte com DAP acima de 30 e qualidade ("ABIU", "MATA")
+            'Selecionada para corte',
+            'Arvore Remanescente Qualidade Fuste 3',
+            'Arvore Remanescente de Futuro',
+            'Arvore Qualidade Fuste 3',
+            
+            # 5. Espécies de porte para corte com DAP acima de 25 ("ACAR")
+            'Selecionada para corte',
+            'Arvore Remanescente Qualidade Fuste 3',
+            'Arvore Remanescente de Futuro',
+            'Arvore Qualidade Fuste 3',
+            
+            # 6. Espécies gerais com DAP acima de 50
             'Selecionada para corte',
             'Arvore Remanescente de Futuro',
             'Arvore Qualidade Fuste 3'
@@ -156,6 +183,7 @@ def classificar_ut_bytes(nome_arquivo_processado, mimetype='application/vnd.open
         # --- Porta Semente e Rara por espécie ---
         # Considera apenas árvores selecionadas para corte, excluindo APP, protegidas e qualidade 3
         selecionadas = tabela_filtrada[
+            #(tabela_filtrada['CLASSIFICAÇÃO'] == 'Selecionada para corte')
             (df.loc[idx, 'CLASSIFICAÇÃO'] == 'Selecionada para corte')
         ]
 
