@@ -48,7 +48,7 @@ def upload_file():
 
         # Exemplo: mostrar preview do processado
         df = pd.read_excel(BytesIO(conteudo_processado))
-        resultado_html = df.head().to_html(classes="results-table", index=False)
+        resultado_html = df.head(10).to_html(classes="results-table", index=False)
         return render_template('index.html', resultado=resultado_html, arquivo_processado=nome_arquivo_saida)
 
 @main.route('/classificar/<arquivo>', methods=['POST'])
