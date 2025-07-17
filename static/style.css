@@ -20,7 +20,9 @@ body {
     background: linear-gradient(135deg, rgba(74, 124, 89, 0.05) 0%, rgba(45, 90, 39, 0.05) 100%);
     transition: all 0.3s ease;
     cursor: pointer;
-    color: #2d5a27;
+    /* color: #2d5a27; */
+    color: #245b37;
+    
     
 }
 
