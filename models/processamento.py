@@ -126,7 +126,7 @@ def classificar_ut_bytes(nome_arquivo_processado, mimetype='application/vnd.open
 
     for valor in df['UT'].unique():
         tabela = df[df['UT'] == valor]
-        print(f"\n--- UT: {valor} ---")
+        # print(f"\n--- UT: {valor} ---")
 
         # Filtra apenas árvores que NÃO são APP nem protegidas
         filtro_nao_app_protegida = ~(
