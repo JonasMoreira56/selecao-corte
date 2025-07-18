@@ -73,18 +73,18 @@ def processar_arquivo_excel_bytes(conteudo_bytes, nome_arquivo_saida, mimetype='
 
     df['DMC'] = df.apply(verifica_dmc, axis=1)
     
-    # coloca a coluna DATA INVENTARIO para o final
-    # if 'DATA INVENTARIO' in df.columns:
-    #     df['DATA INVENTARIO'] = pd.to_datetime(df['DATA INVENTARIO']).dt.strftime('%d/%m/%Y')
-    #     # 2. Move a coluna 'OBSERVAÇÃO' para o final
-    #     # Cria uma lista com todas as colunas
-    #     cols = list(df.columns)
-    #     # Remove a coluna 'OBSERVAÇÃO' da sua posição atual
-    #     cols.remove('DATA INVENTARIO')
-    #     # Adiciona 'OBSERVAÇÃO' ao final da lista de colunas
-    #     cols.append('DATA INVENTARIO')
-    #     # Reordena o DataFrame usando a nova lista de colunas
-    #     df = df[cols]
+    #   coloca a coluna DATA INVENTARIO para o final
+    if 'DATA INVENTARIO' in df.columns:
+        df['DATA INVENTARIO'] = pd.to_datetime(df['DATA INVENTARIO']).dt.strftime('%d/%m/%Y')
+        # 2. Move a coluna 'OBSERVAÇÃO' para o final
+        # Cria uma lista com todas as colunas
+        cols = list(df.columns)
+        # Remove a coluna 'OBSERVAÇÃO' da sua posição atual
+        cols.remove('DATA INVENTARIO')
+        # Adiciona 'OBSERVAÇÃO' ao final da lista de colunas
+        cols.append('DATA INVENTARIO')
+        # Reordena o DataFrame usando a nova lista de colunas
+        df = df[cols]
     
     # if 'DATA INVENTARIO' in df.columns:
     # # Verifique se a coluna já está no formato 'DD/MM/AAAA' para pelo menos um valor
