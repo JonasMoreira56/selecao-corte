@@ -74,18 +74,40 @@ def processar_arquivo_excel_bytes(conteudo_bytes, nome_arquivo_saida, mimetype='
     df['DMC'] = df.apply(verifica_dmc, axis=1)
     
     # coloca a coluna DATA INVENTARIO para o final
-    if 'DATA INVENTARIO' in df.columns:
-        df['DATA INVENTARIO'] = pd.to_datetime(df['DATA INVENTARIO']).dt.strftime('%d/%m/%Y')
-        # 2. Move a coluna 'OBSERVAÇÃO' para o final
-        # Cria uma lista com todas as colunas
-        cols = list(df.columns)
-        # Remove a coluna 'OBSERVAÇÃO' da sua posição atual
-        cols.remove('DATA INVENTARIO')
-        # Adiciona 'OBSERVAÇÃO' ao final da lista de colunas
-        cols.append('DATA INVENTARIO')
-        # Reordena o DataFrame usando a nova lista de colunas
-        df = df[cols]
+    # if 'DATA INVENTARIO' in df.columns:
+    #     df['DATA INVENTARIO'] = pd.to_datetime(df['DATA INVENTARIO']).dt.strftime('%d/%m/%Y')
+    #     # 2. Move a coluna 'OBSERVAÇÃO' para o final
+    #     # Cria uma lista com todas as colunas
+    #     cols = list(df.columns)
+    #     # Remove a coluna 'OBSERVAÇÃO' da sua posição atual
+    #     cols.remove('DATA INVENTARIO')
+    #     # Adiciona 'OBSERVAÇÃO' ao final da lista de colunas
+    #     cols.append('DATA INVENTARIO')
+    #     # Reordena o DataFrame usando a nova lista de colunas
+    #     df = df[cols]
     
+    # if 'DATA INVENTARIO' in df.columns:
+    # # Verifique se a coluna já está no formato 'DD/MM/AAAA' para pelo menos um valor
+    # # Usaremos um bloco try-except para tentar a conversão e capturar erros
+    # # Se ocorrer um erro de conversão, significa que o formato provavelmente não é 'DD/MM/AAAA'
+    
+    #     needs_formatting = False
+    #     try:
+    #         # Tente converter o primeiro valor não nulo para verificar seu formato
+    #         first_date_val = df['DATA INVENTARIO'].loc[0]
+    #         pd.to_datetime(first_date_val, format='%d/%m/%Y')
+    #     except (ValueError, IndexError): # IndexError se a série estiver vazia
+    #         needs_formatting = True
+
+    #     if needs_formatting:
+    #         df['DATA INVENTARIO'] = pd.to_datetime(df['DATA INVENTARIO']).dt.strftime('%d/%m/%Y')
+
+    #     # Move 'DATA INVENTARIO' to the end
+    #     cols = [col for col in df.columns if col != 'DATA INVENTARIO']
+    #     cols.append('DATA INVENTARIO')
+    #     df = df[cols]
+
+      
     # coloca a coluna observação para o final
     if 'OBSERVAÇÃO' in df.columns:
         df['OBSERVAÇÃO'] = df['OBSERVAÇÃO'].replace('NULO','Não Possui')
