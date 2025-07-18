@@ -73,41 +73,36 @@ def processar_arquivo_excel_bytes(conteudo_bytes, nome_arquivo_saida, mimetype='
 
     df['DMC'] = df.apply(verifica_dmc, axis=1)
     
-    #   coloca a coluna DATA INVENTARIO para o final
-    if 'DATA INVENTARIO' in df.columns:
-        df['DATA INVENTARIO'] = pd.to_datetime(df['DATA INVENTARIO']).dt.strftime('%d/%m/%Y')
-        # 2. Move a coluna 'OBSERVAÇÃO' para o final
-        # Cria uma lista com todas as colunas
-        cols = list(df.columns)
-        # Remove a coluna 'OBSERVAÇÃO' da sua posição atual
-        cols.remove('DATA INVENTARIO')
-        # Adiciona 'OBSERVAÇÃO' ao final da lista de colunas
-        cols.append('DATA INVENTARIO')
-        # Reordena o DataFrame usando a nova lista de colunas
-        df = df[cols]
-    
-    # if 'DATA INVENTARIO' in df.columns:
-    # # Verifique se a coluna já está no formato 'DD/MM/AAAA' para pelo menos um valor
-    # # Usaremos um bloco try-except para tentar a conversão e capturar erros
-    # # Se ocorrer um erro de conversão, significa que o formato provavelmente não é 'DD/MM/AAAA'
-    
-    #     needs_formatting = False
-    #     try:
-    #         # Tente converter o primeiro valor não nulo para verificar seu formato
-    #         first_date_val = df['DATA INVENTARIO'].loc[0]
-    #         pd.to_datetime(first_date_val, format='%d/%m/%Y')
-    #     except (ValueError, IndexError): # IndexError se a série estiver vazia
-    #         needs_formatting = True
-
-    #     if needs_formatting:
-    #         df['DATA INVENTARIO'] = pd.to_datetime(df['DATA INVENTARIO']).dt.strftime('%d/%m/%Y')
-
-    #     # Move 'DATA INVENTARIO' to the end
-    #     cols = [col for col in df.columns if col != 'DATA INVENTARIO']
+    # #   coloca a coluna DATA INVENTARIO para o final
+    # if 'DATA INVENTARIO' in df.columns:    
+    #     # 2. Move a coluna 'DATA INVENTARIO' para o final
+    #     # Cria uma lista com todas as colunas
+    #     cols = list(df.columns)
+    #     # Remove a coluna 'DATA INVENTARIO' da sua posição atual
+    #     cols.remove('DATA INVENTARIO')
+    #     # Adiciona 'DATA INVENTARIO ao final da lista de colunas
     #     cols.append('DATA INVENTARIO')
+    #     # Reordena o DataFrame usando a nova lista de colunas
     #     df = df[cols]
-
-      
+    #     # Formata a coluna DATA INVENTARIO
+    #     if df['DATA INVENTARIO'] != '%d/%m/%Y':
+    #         df['DATA INVENTARIO'] = pd.to_datetime(df['DATA INVENTARIO'], errors='coerce').dt.strftime('%d/%m/%Y')
+            
+    # 1. Verifica se a coluna existe
+    if 'DATA INVENTARIO' in df.columns:
+        
+        #   Formata a coluna para o tipo datetime e depois para string no formato desejado
+        #    - pd.to_datetime converte vários formatos de data para um tipo de data padrão.
+        #    - errors='coerce' transforma qualquer data que não puder ser convertida em 'NaT' (Not a Time), evitando erros.
+        #    - .dt.strftime('%d/%m/%Y') formata a data para o formato string 'dd/mm/AAAA'.
+        df['DATA INVENTARIO'] = pd.to_datetime(df['DATA INVENTARIO'], errors='coerce').dt.strftime('%d/%m/%Y')
+        
+        #   Move a coluna 'DATA INVENTARIO' para o final
+        #    Esta é uma maneira um pouco mais curta de fazer o que você já estava fazendo.
+        coluna_data = df.pop('DATA INVENTARIO') # Remove a coluna e a guarda em uma variável
+        df['DATA INVENTARIO'] = coluna_data     # Adiciona a coluna de volta, no final
+            
+            
     # coloca a coluna observação para o final
     if 'OBSERVAÇÃO' in df.columns:
         df['OBSERVAÇÃO'] = df['OBSERVAÇÃO'].replace('NULO','Não Possui')
@@ -120,8 +115,6 @@ def processar_arquivo_excel_bytes(conteudo_bytes, nome_arquivo_saida, mimetype='
         cols.append('OBSERVAÇÃO')
         # Reordena o DataFrame usando a nova lista de colunas
         df = df[cols]
-
-    # --- Fim do processamento ---
 
     # Salva o DataFrame modificado em memória
     output = BytesIO()
