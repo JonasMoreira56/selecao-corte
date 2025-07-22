@@ -17,7 +17,7 @@ arvores_protegidas = ["ANDIROBA", "COPAIBA", "SERINGUEIRA", "CASTANHEIRA", "PAU 
 
 # Rotas e lógica de controle
 # --- Rotas da Aplicação Flask --
-@main.route('/')
+@main.route('/')    
 def index():
     """Renderiza a página inicial com o formulário de upload."""
     return render_template('index.html', resultado=None)
