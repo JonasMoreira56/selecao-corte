@@ -15,20 +15,20 @@ def processar_arquivo_excel_bytes(conteudo_bytes, nome_arquivo_saida, mimetype='
     # Carrega a planilha em um DataFrame do Pandas
     df = pd.read_excel(BytesIO(conteudo_bytes))
 
-    coluna_cap = 'CAP'
-    coluna_dap = 'DAP'
-    coluna_fator = 'FATOR'
+    #coluna_cap = 'CAP'
+    #coluna_dap = 'DAP'
+    #coluna_fator = 'FATOR'
     
     # remover colunas desnecessárias
     if 'fid' in df.columns:
         df['fid'] = df['fid'].astype(str)
         df = df.drop(columns=['fid'], errors='ignore')
     
-    df['DAP'] = df[coluna_cap] / np.pi
+    df['DAP'] = df['CAP'] / np.pi
     df['DAP'] = df['DAP'].round(0)
-    df['FATOR'] = df[coluna_fator].apply(lambda x: f"{float(x):.2f}")
+    df['FATOR'] = df['FATOR'].apply(lambda x: f"{float(x):.2f}")
 
-    limite_inferior = ((df[coluna_dap] // 10) * 10).astype(int)
+    limite_inferior = ((df['DAP'] // 10) * 10).astype(int)
     limite_superior = (limite_inferior + 10).astype(int)
     classe_diametrica = limite_inferior.astype(str) + '-' + limite_superior.astype(str)
     classe_diametrica = np.where(df['DAP'] >= 100, '>100', classe_diametrica)
@@ -73,21 +73,6 @@ def processar_arquivo_excel_bytes(conteudo_bytes, nome_arquivo_saida, mimetype='
 
     df['DMC'] = df.apply(verifica_dmc, axis=1)
     
-    # #   coloca a coluna DATA INVENTARIO para o final
-    # if 'DATA INVENTARIO' in df.columns:    
-    #     # 2. Move a coluna 'DATA INVENTARIO' para o final
-    #     # Cria uma lista com todas as colunas
-    #     cols = list(df.columns)
-    #     # Remove a coluna 'DATA INVENTARIO' da sua posição atual
-    #     cols.remove('DATA INVENTARIO')
-    #     # Adiciona 'DATA INVENTARIO ao final da lista de colunas
-    #     cols.append('DATA INVENTARIO')
-    #     # Reordena o DataFrame usando a nova lista de colunas
-    #     df = df[cols]
-    #     # Formata a coluna DATA INVENTARIO
-    #     if df['DATA INVENTARIO'] != '%d/%m/%Y':
-    #         df['DATA INVENTARIO'] = pd.to_datetime(df['DATA INVENTARIO'], errors='coerce').dt.strftime('%d/%m/%Y')
-            
     # 1. Verifica se a coluna existe
     if 'DATA INVENTARIO' in df.columns:
         
@@ -141,7 +126,6 @@ def classificar_ut_bytes(nome_arquivo_processado, mimetype='application/vnd.open
 
     for valor in df['UT'].unique():
         tabela = df[df['UT'] == valor]
-        # print(f"\n--- UT: {valor} ---")
 
         # Filtra apenas árvores que NÃO são APP nem protegidas
         filtro_nao_app_protegida = ~(
@@ -264,12 +248,7 @@ def classificar_ut_bytes(nome_arquivo_processado, mimetype='application/vnd.open
             arvores_outros = arvores_especie[arvores_especie['QUALIDADE'] != 2].sort_values(by='VOLUME INVENTARIO', ascending=True)
             arvores_selecionadas = pd.concat([arvores_qualidade2, arvores_outros])
             idx_porta_semente = arvores_selecionadas.head(n_porta_semente).index
-            df.loc[idx_porta_semente, 'CLASSIFICAÇÃO'] = 'Porta Semente'
-
-            # print("Resumo final para CUMA:")
-            # print(f"UT: {1} | Total: {total} | Percentual: {percentual}")
-            # print(f"Valor calculado: {valor_calculado} | Porta-semente: {n_porta_semente}")
-        
+            df.loc[idx_porta_semente, 'CLASSIFICAÇÃO'] = 'Porta Semente'        
 
     # Salva o DataFrame atualizado em memória
     output = BytesIO()  
