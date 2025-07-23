@@ -14,10 +14,6 @@ def processar_arquivo_excel_bytes(conteudo_bytes, nome_arquivo_saida, mimetype='
     """
     # Carrega a planilha em um DataFrame do Pandas
     df = pd.read_excel(BytesIO(conteudo_bytes))
-
-    #coluna_cap = 'CAP'
-    #coluna_dap = 'DAP'
-    #coluna_fator = 'FATOR'
     
     # remover colunas desnecessárias
     if 'fid' in df.columns:
