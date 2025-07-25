@@ -1,9 +1,6 @@
 import os
 from flask import Flask
-from dotenv import load_dotenv
 from controllers.main_controller import main
-
-load_dotenv()  # Carrega as variáveis do arquivo .env
 
 # Define as pastas para upload e arquivos processados
 # UPLOAD_FOLDER = 'uploads'
@@ -18,8 +15,8 @@ app = Flask(__name__)
 
 # app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # app.config['PROCESSED_FOLDER'] = PROCESSED_FOLDER
-
 app.register_blueprint(main)
+
 
 if __name__ == '__main__':
     # Inicia o servidor Flask
