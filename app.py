@@ -6,8 +6,8 @@ from controllers.main_controller import main
 load_dotenv()  # Carrega as variáveis do arquivo .env
 
 # Define as pastas para upload e arquivos processados
-UPLOAD_FOLDER = 'uploads'
-PROCESSED_FOLDER = 'processed'
+# UPLOAD_FOLDER = 'uploads'
+# PROCESSED_FOLDER = 'processed'
 
 # # Garante que as pastas existam
 # os.makedirs(UPLOAD_FOLDER, exist_ok=True)

@@ -51,23 +51,47 @@ def processar_arquivo_excel_bytes(conteudo_bytes, nome_arquivo_saida, mimetype='
     
     
     # Nova coluna DMC: verifica o critério por espécie
-    def verifica_dmc(row):
-        especie = row['ESPECIE'].upper()
-        dap = row['DAP']
-        if especie in ['ABIU', 'MATA']:
-            return 'Atende' if dap >= 30 else 'Não Atende'
-        elif especie == 'ACAR':
-            return 'Atende' if dap >= 25 else 'Não Atende'
-        elif especie in ['CUMA', 'CUVE']:
-            return 'Atende' if dap >= 80 else 'Não Atende'
-        elif especie in ['IPRO', 'IPAM']:
-            return 'Atende' if dap >= 70 else 'Não Atende'
-        elif row['CLASSIFICAÇÃO'] == 'Arvore protegida':
-            return 'Protegida'
-        else:
-            return 'Atende' if dap >= 50 else 'Não Atende'
+    # def verifica_dmc(row):
+    #     especie = row['ESPECIE'].upper()
+    #     dap = row['DAP']
+    #     if especie in ['ABIU', 'MATA']:
+    #         return 'Atende' if dap >= 30 else 'Não Atende'
+    #     elif especie == 'ACAR':
+    #         return 'Atende' if dap >= 25 else 'Não Atende'
+    #     elif especie in ['CUMA', 'CUVE']:
+    #         return 'Atende' if dap >= 80 else 'Não Atende'
+    #     elif especie in ['IPRO', 'IPAM']:
+    #         return 'Atende' if dap >= 70 else 'Não Atende'
+    #     elif row['CLASSIFICAÇÃO'] == 'Arvore protegida':
+    #         return 'Protegida'
+    #     else:
+    #         return 'Atende' if dap >= 50 else 'Não Atende'
 
-    df['DMC'] = df.apply(verifica_dmc, axis=1)
+    # df['DMC'] = df.apply(verifica_dmc, axis=1)
+    
+    
+    # Nova coluna DMC: otimizada com np.select
+    condicoes_dmc = [
+        (df['ESPECIE'].isin(['ABIU', 'MATA'])) & (df['DAP'] >= 30),
+        (df['ESPECIE'].isin(['ABIU', 'MATA'])) & (df['DAP'] < 30),
+        (df['ESPECIE'] == 'ACAR') & (df['DAP'] >= 25),
+        (df['ESPECIE'] == 'ACAR') & (df['DAP'] < 25),
+        (df['ESPECIE'].isin(['CUMA', 'CUVE'])) & (df['DAP'] >= 80),
+        (df['ESPECIE'].isin(['CUMA', 'CUVE'])) & (df['DAP'] < 80),
+        (df['ESPECIE'].isin(['IPRO', 'IPAM'])) & (df['DAP'] >= 70),
+        (df['ESPECIE'].isin(['IPRO', 'IPAM'])) & (df['DAP'] < 70),
+        (df['CLASSIFICAÇÃO'] == 'Arvore protegida'),
+        (df['DAP'] >= 50) # Condição geral para as demais espécies
+    ]
+    resultados_dmc = [
+        'Atende', 'Não Atende',
+        'Atende', 'Não Atende',
+        'Atende', 'Não Atende',
+        'Atende', 'Não Atende',
+        'Protegida',
+        'Atende' # Resultado para a condição geral
+    ]
+    df['DMC'] = np.select(condicoes_dmc, resultados_dmc, default='Não Atende')
     
     # 1. Verifica se a coluna existe
     if 'DATA INVENTARIO' in df.columns:
