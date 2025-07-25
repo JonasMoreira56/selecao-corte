@@ -12,8 +12,17 @@ def processar_arquivo_excel_bytes(conteudo_bytes, nome_arquivo_saida, mimetype='
     Lê um arquivo Excel em memória, aplica as regras de negócio e retorna o arquivo processado em memória.
     Também salva o arquivo processado no banco de dados.
     """
-    # Carrega a planilha em um DataFrame do Pandas
-    df = pd.read_excel(BytesIO(conteudo_bytes))
+    # # Carrega a planilha em um DataFrame do Pandas
+    # df = pd.read_excel(BytesIO(conteudo_bytes))
+    # Itera sobre o arquivo Excel em pedaços de 1000 linhas de cada vez
+    with pd.ExcelFile(BytesIO(conteudo_bytes)) as xls:
+        for sheet_name in xls.sheet_names:
+            # O 'chunksize' retorna um iterador
+            for df_chunk in pd.read_excel(xls, sheet_name=sheet_name, chunksize=1000):
+                # Faça o processamento necessário em cada pedaço (df_chunk)
+                # Exemplo: processar e inserir no banco de dados por partes
+                print(f"Processando {len(df_chunk)} linhas da planilha {sheet_name}")
+                # ... sua lógica de processamento aqui ...
     
     # remover colunas desnecessárias
     if 'fid' in df.columns:
