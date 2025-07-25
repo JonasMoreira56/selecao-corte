@@ -9,7 +9,6 @@ from werkzeug.utils import secure_filename
 from flask import send_file
 from models.processamento import processar_arquivo_excel_bytes, classificar_ut_bytes
 
-criar_tabela_arquivos()
 main = Blueprint('main', __name__)
 
 # Lista inicial de árvores protegidas (Em teste, pode ser carregada do banco de dados)
